@@ -31,6 +31,7 @@ import io.github.proify.lyricon.cmprovider.xposed.parser.LyricResponse
 import io.github.proify.lyricon.cmprovider.xposed.parser.toSong
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.provider.LyriconProvider
+import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
 import io.github.proify.lyricon.provider.common.extensions.json
 import kotlinx.coroutines.CoroutineScope
@@ -54,7 +55,7 @@ object CloudMusic : YukiBaseHooker(), LyricFileObserver.FileObserverCallback {
     private var provider: LyriconProvider? = null
     private var lastSong: Song? = null
 
-    private const val POSITION_UPDATE_INTERVAL = 1000L / 24
+    private const val POSITION_UPDATE_INTERVAL = ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL
 
     private val hotHooker = HotHooker()
 

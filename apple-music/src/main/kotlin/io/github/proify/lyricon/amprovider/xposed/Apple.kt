@@ -24,6 +24,7 @@ import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import de.robv.android.xposed.XposedHelpers
 import io.github.proify.lyricon.provider.LyriconProvider
+import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
 import io.github.proify.lyricon.provider.common.util.ScreenStateMonitor
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +42,7 @@ import java.lang.reflect.Modifier
  * @since 2026/1/15
  */
 object Apple : YukiBaseHooker() {
-    private const val POSITION_UPDATE_INTERVAL = 1000L / 24
+    private const val POSITION_UPDATE_INTERVAL = ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL
 
     private lateinit var application: Application
     private lateinit var classLoader: ClassLoader
