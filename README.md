@@ -43,10 +43,9 @@
 
 如果你想为自己喜欢的音乐 App 开发插件，可以参考以下资源：
 
-- **核心接口定义**：参考 `lyric-bridge` 模块。
-- **示例代码**：本项目中的 `apple-music` 模块是绝佳的参考对象。
-- **提交准则**：确保代码逻辑清晰，不对目标 App 造成稳定性影响。
-
+- **开发文档**
+  ：参考 [开发文档](https://github.com/proify/lyricon/blob/master/lyric/bridge/provider/README.md)
+- **示例代码**：参考项目中实现代码
 ---
 
 ## 🤝 贡献与反馈
