@@ -34,5 +34,5 @@ dependencyResolutionManagement {
 rootProject.name = "LyricProvider"
 include(":apple-music")
 include(":clound-music")
-//include(":qq-music")
+include(":qq-music")
 include(":common")

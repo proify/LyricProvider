@@ -14,6 +14,42 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LyricProvider" >
 
+        <meta-data
+            android:name="lyricon_module"
+            android:value="true" />
+
+        <meta-data
+            android:name="lyricon_module_author"
+            android:value="Tomakino" />
+
+        <meta-data
+            android:name="lyricon_module_description"
+            android:value="@string/lyricon_module_description" />
+
+        <meta-data
+            android:name="lyricon_module_tags"
+            android:resource="@array/lyricon_module_tags" />
+
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
+
+        <meta-data
+            android:name="xposeddescription"
+            android:value="@string/xposed_description" />
+
+        <meta-data
+            android:name="xposedminversion"
+            android:value="93" />
+
+        <meta-data
+            android:name="xposedsharedprefs"
+            android:value="true" />
+
     </application>
 
 </manifest>

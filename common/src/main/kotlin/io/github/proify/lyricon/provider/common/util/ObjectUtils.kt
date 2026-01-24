@@ -9,34 +9,37 @@
 package io.github.proify.lyricon.provider.common.util
 
 import android.util.Log
+import java.lang.reflect.Array
 
 object ObjectUtils {
 
     private const val TAG = "ObjectUtils"
+    private const val MAX_DEPTH = 5 // 防止过深递归
 
     /**
-     * 打印对象的字段和方法信息到 Log
-     * @param obj 要打印的对象
-     * @param tag 自定义 Log 标签，如果为 null 则使用默认 TAG
-     * @param logLevel Log 级别，默认为 Log.DEBUG
-     * @param prefix 只打印指定前缀的方法
+     * 打印对象的字段和方法信息到 Log（支持递归）
      */
     fun print(
-        obj: Any,
+        obj: Any?,
         tag: String? = null,
         logLevel: Int = Log.DEBUG,
-        prefix: Array<String>? = null
+        prefix: List<String>? = null,
+        printList: Boolean = false // 保留参数，但逻辑已内建
     ) {
+        if (obj == null) {
+            logMessage(tag ?: TAG, logLevel, "Object is null")
+            return
+        }
         val logTag = tag ?: TAG
         val className = obj.javaClass.simpleName
 
         try {
-            // 打印类信息
+            val visited = mutableSetOf<Any>()
             logMessage(logTag, logLevel, "╔═══════════════════════════════════════════")
             logMessage(logTag, logLevel, "║ Class: ${obj.javaClass.name}")
             logMessage(logTag, logLevel, "╠═══════════════════════════════════════════")
 
-            // 打印字段信息
+            // 打印字段
             val fields = obj.javaClass.fields
             if (fields.isNotEmpty()) {
                 logMessage(logTag, logLevel, "║ Fields (${fields.size}):")
@@ -44,7 +47,9 @@ object ObjectUtils {
                     field.isAccessible = true
                     try {
                         val value = field.get(obj)
-                        logMessage(logTag, logLevel, "║   ${field.name}: ${formatValue(value)}")
+                        val formatted =
+                            formatValueRecursive(value, visited, depth = 0, indent = "║   ")
+                        logMessage(logTag, logLevel, "║   ${field.name}: $formatted")
                     } catch (e: IllegalAccessException) {
                         logMessage(logTag, Log.WARN, "║   ${field.name}: <inaccessible>")
                     } catch (e: Exception) {
@@ -57,20 +62,21 @@ object ObjectUtils {
                 logMessage(logTag, logLevel, "╠═══════════════════════════════════════════")
             }
 
-            // 打印方法信息（无参数方法）
+            // 打印无参方法
             val declaredMethods = obj.javaClass.methods
             val noArgMethods = declaredMethods.filter { it.parameterCount == 0 }
-
             if (noArgMethods.isNotEmpty()) {
                 logMessage(logTag, logLevel, "║ No-argument Methods (${noArgMethods.size}):")
                 for (method in noArgMethods) {
-                    if (method.name.startsWith("access$")) continue // 跳过编译器生成的方法
+                    if (method.name.startsWith("access$")) continue
                     if (prefix != null && !prefix.any { method.name.startsWith(it) }) continue
 
                     method.isAccessible = true
                     try {
                         val value = method.invoke(obj)
-                        logMessage(logTag, logLevel, "║   ${method.name}(): ${formatValue(value)}")
+                        val formatted =
+                            formatValueRecursive(value, visited, depth = 0, indent = "║   ")
+                        logMessage(logTag, logLevel, "║   ${method.name}(): $formatted")
                     } catch (e: IllegalAccessException) {
                         logMessage(logTag, Log.WARN, "║   ${method.name}(): <inaccessible>")
                     } catch (e: Exception) {
@@ -88,11 +94,6 @@ object ObjectUtils {
         }
     }
 
-    /**
-     * 打印对象的简要信息到 Log（字段值）
-     * @param obj 要打印的对象
-     * @param tag 自定义 Log 标签
-     */
     fun printSimple(obj: Any, tag: String? = null) {
         val logTag = tag ?: TAG
         val className = obj.javaClass.simpleName
@@ -104,10 +105,12 @@ object ObjectUtils {
                 return
             }
 
+            val visited = mutableSetOf<Any>()
             val fieldValues = fields.joinToString(", ") { field ->
                 field.isAccessible = true
                 try {
-                    "${field.name}=${formatValue(field.get(obj))}"
+                    val value = field.get(obj)
+                    "${field.name}=${formatValueRecursive(value, visited, depth = 0)}"
                 } catch (e: Exception) {
                     "${field.name}=<error>"
                 }
@@ -121,28 +124,111 @@ object ObjectUtils {
     }
 
     /**
-     * 格式化值，使其在日志中更易读
+     * 递归格式化值，支持嵌套对象、集合、数组
      */
-    private fun formatValue(value: Any?): String {
-        return when (value) {
-            null -> "null"
-            is String -> "\"$value\""
-            is Array<*> -> value.contentToString()
-            is List<*> -> value.toString()
-            is Map<*, *> -> value.toString()
-            is Set<*> -> value.toString()
-            is Collection<*> -> value.toString()
-            is Boolean, is Number, is Char -> value.toString()
+    private fun formatValueRecursive(
+        value: Any?,
+        visited: MutableSet<Any>,
+        depth: Int,
+        indent: String = ""
+    ): String {
+        if (depth > MAX_DEPTH) return "<max depth reached>"
+
+        return when {
+            value == null -> "null"
+            value is String -> "\"$value\""
+            value is Boolean || value is Number || value is Char -> value.toString()
+            value.javaClass.isArray -> formatArray(value, visited, depth, indent)
+            value is Collection<*> -> formatCollection(value, visited, depth, indent)
+            value is Map<*, *> -> formatMap(value, visited, depth, indent)
             else -> {
-                // 如果是自定义对象，显示类名和哈希码
-                "${value.javaClass.simpleName}@${Integer.toHexString(value.hashCode())}"
+                // 自定义对象：防止循环引用
+                if (!visited.add(value)) {
+                    return "${value.javaClass.simpleName}@${Integer.toHexString(value.hashCode())} <circular>"
+                }
+
+                try {
+                    val fields = value.javaClass.declaredFields
+                    if (fields.isEmpty()) {
+                        "${value.javaClass.simpleName}@${Integer.toHexString(value.hashCode())}"
+                    } else {
+                        val sb = StringBuilder("${value.javaClass.simpleName} {\n")
+                        val nextIndent = "$indent  "
+                        for (field in fields) {
+                            field.isAccessible = true
+                            try {
+                                val fieldValue = field.get(value)
+                                val formatted =
+                                    formatValueRecursive(fieldValue, visited, depth + 1, nextIndent)
+                                sb.append("$nextIndent${field.name} = $formatted\n")
+                            } catch (e: Exception) {
+                                sb.append("$nextIndent${field.name} = <error>\n")
+                            }
+                        }
+                        sb.append("$indent}")
+                        sb.toString()
+                    }
+                } finally {
+                    visited.remove(value) // 允许其他路径再次访问（非严格 DAG）
+                }
             }
         }
     }
 
-    /**
-     * 根据级别输出 Log 消息
-     */
+    private fun formatArray(
+        array: Any,
+        visited: MutableSet<Any>,
+        depth: Int,
+        indent: String
+    ): String {
+        val len = Array.getLength(array)
+        if (len == 0) return "[]"
+        val sb = StringBuilder("[\n")
+        val nextIndent = "$indent  "
+        for (i in 0 until len) {
+            val elem = Array.get(array, i)
+            val formatted = formatValueRecursive(elem, visited, depth + 1, nextIndent)
+            sb.append("$nextIndent$formatted,\n")
+        }
+        sb.append("$indent]")
+        return sb.toString()
+    }
+
+    private fun formatCollection(
+        collection: Collection<*>,
+        visited: MutableSet<Any>,
+        depth: Int,
+        indent: String
+    ): String {
+        if (collection.isEmpty()) return "[]"
+        val sb = StringBuilder("[\n")
+        val nextIndent = "$indent  "
+        for (item in collection) {
+            val formatted = formatValueRecursive(item, visited, depth + 1, nextIndent)
+            sb.append("$nextIndent$formatted,\n")
+        }
+        sb.append("$indent]")
+        return sb.toString()
+    }
+
+    private fun formatMap(
+        map: Map<*, *>,
+        visited: MutableSet<Any>,
+        depth: Int,
+        indent: String
+    ): String {
+        if (map.isEmpty()) return "{}"
+        val sb = StringBuilder("{\n")
+        val nextIndent = "$indent  "
+        for ((key, value) in map) {
+            val keyStr = formatValueRecursive(key, visited, depth + 1, "")
+            val valueStr = formatValueRecursive(value, visited, depth + 1, nextIndent)
+            sb.append("$nextIndent$keyStr: $valueStr,\n")
+        }
+        sb.append("$indent}")
+        return sb.toString()
+    }
+
     private fun logMessage(tag: String, level: Int, message: String) {
         when (level) {
             Log.VERBOSE -> Log.v(tag, message)
@@ -154,13 +240,10 @@ object ObjectUtils {
         }
     }
 
-    /**
-     * 将对象信息转为字符串（用于调试，不输出到 Log）
-     */
     fun toString(obj: Any): String {
+        val visited = mutableSetOf<Any>()
         return buildString {
             appendLine("Class: ${obj.javaClass.name}")
-
             val fields = obj.javaClass.declaredFields
             if (fields.isNotEmpty()) {
                 appendLine("Fields:")
@@ -168,7 +251,9 @@ object ObjectUtils {
                     field.isAccessible = true
                     try {
                         val value = field.get(obj)
-                        appendLine("  ${field.name}: ${formatValue(value)}")
+                        val formatted =
+                            formatValueRecursive(value, visited, depth = 0, indent = "  ")
+                        appendLine("  ${field.name}: $formatted")
                     } catch (e: Exception) {
                         appendLine("  ${field.name}: <error: ${e.message}>")
                     }

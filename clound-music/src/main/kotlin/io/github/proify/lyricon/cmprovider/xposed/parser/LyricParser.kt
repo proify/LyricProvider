@@ -17,6 +17,7 @@ import io.github.proify.lyricon.cmprovider.xposed.parser.model.YrcEntry
 import io.github.proify.lyricon.cmprovider.xposed.parser.model.YrcSyllable
 import kotlinx.serialization.json.Json
 import java.util.regex.Pattern
+import kotlin.math.abs
 
 object LyricParser {
 
@@ -59,7 +60,7 @@ object LyricParser {
         lyrics.forEach { line ->
             sources.forEach { source ->
                 val translation =
-                    source.firstOrNull { line.start == it.start }
+                    source.firstOrNull { abs(it.start - line.start) < 100 }
                 if (translation != null && translation.text.isNotEmpty()) {
                     line.translation = translation.text
                     return@forEach
@@ -105,7 +106,7 @@ object LyricParser {
         if (raw.isNullOrBlank()) return entries
 
         raw.lineSequence().forEach { line ->
-            if (line.isBlank() || line.trim().startsWith("{")) return@forEach
+            if (line.isBlank() || line.trim().startsWith("[").not()) return@forEach
 
             val matcher = LRC_TIME_REGEX.matcher(line)
             var lastEndIndex = 0

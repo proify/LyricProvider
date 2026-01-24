@@ -5,5 +5,8 @@
   -->
 
 <resources>
-    <string name="app_name">QM 歌词提供</string>
+    <string name="app_name">QQ音乐歌词提供</string>
+
+    <string name="xposed_description">为词幕提供QQ音乐歌词</string>
+    <string name="lyricon_module_description">提供QQ音乐歌词。</string>
 </resources>
