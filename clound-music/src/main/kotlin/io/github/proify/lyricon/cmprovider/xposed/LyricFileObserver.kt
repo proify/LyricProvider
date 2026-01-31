@@ -10,7 +10,6 @@ package io.github.proify.lyricon.cmprovider.xposed
 
 import android.content.Context
 import android.os.FileObserver
-import com.highcapable.yukihookapi.hook.log.YLog
 import java.io.File
 
 class LyricFileObserver(context: Context, private val callback: FileObserverCallback) {
@@ -25,14 +24,14 @@ class LyricFileObserver(context: Context, private val callback: FileObserverCall
     private val observers = watchDirs.map { dir ->
         object : FileObserver(dir.absolutePath, CREATE or DELETE or MODIFY) {
             override fun onEvent(event: Int, path: String?) {
-                path ?: return
-                val file = File(dir, path)
-                
-                // 确保只回调存在的文件
-                if (file.exists() && file.isFile) {
-                    YLog.debug("LyricFileObserver: $event ${file.absolutePath}")
-                    callback.onFileChanged(event, file)
-                }
+
+                //YLog.debug("LyricFileObserver: $event $path")
+                if (path.isNullOrEmpty()) return
+
+                val file = File(cacheDir, path)
+                if (!file.exists() || !file.isFile) return
+
+                callback.onFileChanged(event, file)
             }
         }
     }

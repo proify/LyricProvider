@@ -8,4 +8,5 @@
     <string name="app_name">网易云音乐歌词支持</string>
     <string name="xposed_description">为词幕提供网易云音乐歌词</string>
     <string name="lyricon_module_description">提供网易云音乐歌词，适配9.4.50版本。</string>
+    <string name="lyricon_module_category">网易云</string>
 </resources>

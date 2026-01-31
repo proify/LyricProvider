@@ -13,6 +13,7 @@ import com.highcapable.kavaref.condition.type.VagueType
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import de.robv.android.xposed.XposedHelpers
+import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
@@ -27,13 +28,7 @@ import kotlinx.coroutines.launch
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
 
-/**
- * @author Proify
- * @since 2026/1/15
- */
 object Apple : YukiBaseHooker() {
-    private const val POSITION_UPDATE_INTERVAL = ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL
-
     private lateinit var application: Application
     private lateinit var classLoader: ClassLoader
 
@@ -75,7 +70,7 @@ object Apple : YukiBaseHooker() {
 
     private fun initProvider() {
         val helper =
-            LyriconProvider(
+            LyriconFactory.createProvider(
                 context = application,
                 providerPackageName = Constants.APP_PACKAGE_NAME,
                 playerPackageName = application.packageName,
@@ -87,7 +82,6 @@ object Apple : YukiBaseHooker() {
             requester = LyricRequester(classLoader, application)
         )
 
-        helper.player.setPositionUpdateInterval(POSITION_UPDATE_INTERVAL.toInt())
         helper.player.setDisplayTranslation(PreferencesMonitor.isTranslationSelected())
         helper.register()
         this.provider = helper
@@ -125,7 +119,6 @@ object Apple : YukiBaseHooker() {
                 PlaybackManager.onSongChanged(metadata.id)
             }
         }
-
     }
 
     // --- Hook 2: 歌词构建监听 ---
@@ -214,9 +207,8 @@ object Apple : YukiBaseHooker() {
                     val pos = getPositionMethod?.invoke(exoMediaPlayerInstance) as? Long ?: 0L
                     provider?.player?.setPosition(pos)
                 } catch (_: Exception) {
-                    // Ignore
                 }
-                delay(POSITION_UPDATE_INTERVAL)
+                delay(ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL)
             }
         }
     }
@@ -244,9 +236,11 @@ object Apple : YukiBaseHooker() {
     }
 
     private fun findMediaMetadataChangeMethod() =
-        classLoader.loadClass("android.support.v4.media.MediaMetadataCompat")
+        "android.support.v4.media.MediaMetadataCompat".toClass()
             .declaredMethods.firstOrNull {
-                Modifier.isPublic(it.modifiers) && Modifier.isStatic(it.modifiers) &&
-                        it.parameterCount == 1 && it.returnType.simpleName.contains("MediaMetadata")
+                Modifier.isPublic(it.modifiers)
+                        && Modifier.isStatic(it.modifiers)
+                        && it.parameterCount == 1
+                        && it.returnType.simpleName.contains("MediaMetadata")
             }
 }

@@ -10,12 +10,7 @@ import com.highcapable.kavaref.extension.makeAccessible
 import kotlinx.serialization.Serializable
 import java.lang.reflect.Method
 
-/**
- * 媒体元数据反射缓存工具。
- * * 负责通过反射从网易云音乐内部对象中提取歌曲信息。
- */
 object MediaMetadataCache {
-    // 使用 LRU 策略缓存最近的歌曲信息
     private val metadataCache = object : LinkedHashMap<String, Metadata>(16, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Metadata>?): Boolean =
             size > 50
@@ -26,9 +21,6 @@ object MediaMetadataCache {
     private var getArtistsNameMethod: Method? = null
     private var getDurationMethod: Method? = null
 
-    /**
-     * 安全反射调用辅助方法。
-     */
     private fun Method?.invokeSafe(any: Any): Any? {
         return try {
             this?.invoke(any)
@@ -37,10 +29,6 @@ object MediaMetadataCache {
         }
     }
 
-    /**
-     * 解析元数据对象并存入缓存。
-     * * @param bizMusicMeta 网易云音乐内部 BizMusicMeta 对象实例。
-     */
     fun putAndGet(bizMusicMeta: Any): Metadata? {
         val javaClass = bizMusicMeta.javaClass
 

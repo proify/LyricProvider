@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/clound-music" />
             <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/qq-music" />
+            <option value="$PROJECT_DIR$/qrckit" />
           </set>
         </option>
       </GradleProjectSettings>

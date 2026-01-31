@@ -20,10 +20,10 @@ configure<ApplicationExtension> {
 
     defaultConfig {
         applicationId = "io.github.proify.lyricon.qmprovider"
-        minSdk = 28
+        minSdk = 27
         targetSdk = 36
         versionCode = 2
-        versionName = "1.0.0"
+        versionName = "1.0.0-alpha1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -63,6 +63,8 @@ configure<ApplicationExtension> {
 
 dependencies {
     implementation(project(":common"))
+    implementation(project(":qrckit"))
+
     implementation(libs.lyricon.provider)
     implementation(libs.kotlinx.serialization.json)
 

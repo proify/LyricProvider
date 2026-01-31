@@ -18,7 +18,7 @@ configure<LibraryExtension> {
     }
 
     defaultConfig {
-        minSdk = 28
+        minSdk = 21
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")

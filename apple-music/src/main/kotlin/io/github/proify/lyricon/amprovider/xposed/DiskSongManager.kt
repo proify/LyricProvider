@@ -21,8 +21,7 @@ object DiskSongManager {
     fun initialize(context: Context) {
         val lyriconDir = File(context.filesDir, "lyricon")
 
-        val locales = context.resources.configuration.locales
-        val locale = if (locales.isEmpty) Locale.getDefault() else locales[0]
+        val locale = Locale.getDefault()
         baseDir = File(File(lyriconDir, "songs"), locale.toLanguageTag())
         baseDir?.mkdirs()
     }
@@ -40,15 +39,6 @@ object DiskSongManager {
                         .toByteArray(Charsets.UTF_8)
                         .deflate()
                 )
-
-//            val songFile = File(file.parentFile, file.nameWithoutExtension + ".song.json.gz")
-//            if (songFile.exists()) songFile.delete()
-//            songFile.writeBytes(
-//                json.encodeToString(appleSong.toSong())
-//                    .toByteArray(Charsets.UTF_8)
-//                    .deflate()
-//            )
-
         }.isSuccess
     }
 
@@ -68,6 +58,5 @@ object DiskSongManager {
     }
 
     fun hasCache(id: String): Boolean = getFile(id).exists()
-
     private fun getFile(id: String): File = File(baseDir, "$id.json.gz")
 }

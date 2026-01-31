@@ -4,10 +4,17 @@
       <w>amprovider</w>
       <w>cloudmusic</w>
       <w>cmprovider</w>
+      <w>lrctype</w>
       <w>lyriconmodule</w>
+      <w>mmkv</w>
+      <w>musicid</w>
       <w>netease</w>
       <w>qmprovider</w>
       <w>qqmusic</w>
+      <w>qqmusicplayer</w>
+      <w>qrckit</w>
+      <w>showromalyric</w>
+      <w>showtranslyric</w>
       <w>temurin</w>
     </words>
   </dictionary>

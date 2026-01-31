@@ -4,7 +4,8 @@
   ~ http://www.apache.org/licenses/LICENSE-2.0
   -->
 
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" >
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <application
         android:allowBackup="true"
@@ -12,7 +13,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.LyricProvider" >
+        android:theme="@style/Theme.LyricProvider"
+        tools:overrideLibrary="io.github.proify.lyricon.provider.common">
 
         <meta-data
             android:name="lyricon_module"

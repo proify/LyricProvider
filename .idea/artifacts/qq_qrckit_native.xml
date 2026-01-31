@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="qq-qrckit-native">
+    <output-path>$PROJECT_DIR$/qq-qrckit-native/build/libs</output-path>
+    <root id="archive" name="qq-qrckit-native.jar">
+      <element id="module-output" name="LyricProvider.qq-qrckit-native.androidMain" />
+    </root>
+  </artifact>
+</component>

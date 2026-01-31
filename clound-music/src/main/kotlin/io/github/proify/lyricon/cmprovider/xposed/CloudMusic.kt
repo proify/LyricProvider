@@ -19,6 +19,7 @@ import io.github.proify.lyricon.cmprovider.xposed.Constants.ICON
 import io.github.proify.lyricon.cmprovider.xposed.PreferencesMonitor.PreferenceCallback
 import io.github.proify.lyricon.cmprovider.xposed.parser.LyricParser
 import io.github.proify.lyricon.lyric.model.Song
+import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
@@ -34,17 +35,10 @@ import org.luckypray.dexkit.DexKitBridge
 import java.io.File
 import java.lang.reflect.Method
 
-/**
- * @author Tomakino
- * @since 2026/1/20
- */
 @SuppressLint("StaticFieldLeak")
 object CloudMusic : YukiBaseHooker(), LyricFileObserver.FileObserverCallback {
     private var provider: LyriconProvider? = null
     private var lastSong: Song? = null
-
-    private const val POSITION_UPDATE_INTERVAL = ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL
-
     private val hotHooker = HotHooker()
 
     // 状态追踪
@@ -69,7 +63,10 @@ object CloudMusic : YukiBaseHooker(), LyricFileObserver.FileObserverCallback {
     }
 
     override fun onHook() {
-        YLog.debug("Hooking...")
+        if (processName != "com.netease.cloudmusic:play") return
+
+        YLog.debug("Hooking, processName= $processName")
+
         dexKitBridge = DexKitBridge.create(appInfo.sourceDir)
         preferencesMonitor = PreferencesMonitor(dexKitBridge!!, object : PreferenceCallback {
             override fun onTranslationOptionChanged(isTranslationSelected: Boolean) {
@@ -117,7 +114,7 @@ object CloudMusic : YukiBaseHooker(), LyricFileObserver.FileObserverCallback {
         val application = appContext ?: return
         provider?.destroy()
 
-        val newProvider = LyriconProvider(
+        val newProvider = LyriconFactory.createProvider(
             context = application,
             providerPackageName = APP_PACKAGE_NAME,
             playerPackageName = application.packageName,
@@ -125,7 +122,6 @@ object CloudMusic : YukiBaseHooker(), LyricFileObserver.FileObserverCallback {
         )
 
         newProvider.player.apply {
-            setPositionUpdateInterval(POSITION_UPDATE_INTERVAL.toInt())
             setDisplayTranslation(preferencesMonitor?.isTranslationSelected() == true)
         }
         newProvider.register()
@@ -179,7 +175,7 @@ object CloudMusic : YukiBaseHooker(), LyricFileObserver.FileObserverCallback {
     ) {
         val id = metadata.id
 
-        // 1. 构建占位符（快速响应 UI）
+        // 1. 构建占位符
         val placeholder = Song(
             id = id,
             name = metadata.title,
@@ -252,7 +248,7 @@ object CloudMusic : YukiBaseHooker(), LyricFileObserver.FileObserverCallback {
             while (isActive && isPlaying) {
                 val pos = readPosition()
                 provider?.player?.setPosition(pos.toLong())
-                delay(POSITION_UPDATE_INTERVAL)
+                delay(ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL)
             }
         }
     }

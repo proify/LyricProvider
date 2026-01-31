@@ -13,5 +13,5 @@ val json: Json = Json {
     ignoreUnknownKeys = true     // 忽略未知字段
     isLenient = true             // 宽松的 JSON 语法
     explicitNulls = false        // 不序列化 null
-    encodeDefaults = false       // 不序列化默认值
+    //encodeDefaults = false       // 不序列化默认值
 }

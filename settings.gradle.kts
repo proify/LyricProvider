@@ -6,6 +6,9 @@
 
 @file:Suppress("UnstableApiUsage")
 
+include(":qrckit")
+
+
 pluginManagement {
     repositories {
         mavenLocal()
@@ -34,5 +37,7 @@ dependencyResolutionManagement {
 rootProject.name = "LyricProvider"
 include(":apple-music")
 include(":clound-music")
+
 include(":qq-music")
+
 include(":common")
