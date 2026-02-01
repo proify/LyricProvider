@@ -53,20 +53,6 @@
 
 ---
 
-## 🤝 贡献与反馈
-
-<p align="left">
-  <a href="https://github.com/proify/LyricProvider/issues">
-    <img src="https://img.shields.io/github/issues/proify/LyricProvider?style=flat-square&logo=github" alt="Issues">
-  </a>
-</p>
-
-### 贡献者
-
-[![Contributors](https://contrib.rocks/image?repo=proify/LyricProvider)](https://github.com/proify/LyricProvider/graphs/contributors)
-
----
-
 ## 📊 统计与历史
 
 ### 访问统计
