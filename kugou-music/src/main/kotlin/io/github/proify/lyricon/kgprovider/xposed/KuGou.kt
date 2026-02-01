@@ -16,6 +16,7 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderLogo
+import io.github.proify.lyricon.provider.common.util.Utils
 
 object KuGou : YukiBaseHooker() {
     private const val TAG = "KuGouMusicProvider"
@@ -33,6 +34,8 @@ object KuGou : YukiBaseHooker() {
     }
 
     override fun onHook() {
+        Utils.openBluetoothA2dpOn(appClassLoader)
+
         if (processName != TARGET_PROCESS) return
 
         YLog.debug(tag = TAG, msg = "正在注入进程: $processName")

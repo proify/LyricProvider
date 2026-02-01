@@ -45,7 +45,7 @@ class LyricFileObserver(context: Context, callback: FileObserverCallback) {
 
     fun getFile(id: String): File? {
         return watchDirs.map { File(it, id) }
-            .firstOrNull { it.isFile }
+            .firstOrNull { it.exists() && it.isFile }
     }
 
     interface FileObserverCallback {

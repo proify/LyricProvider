@@ -9,6 +9,7 @@
 package io.github.proify.lyricon.cmprovider.xposed
 
 import android.app.Application
+import android.util.Log
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
@@ -35,6 +36,7 @@ import java.io.File
 import java.lang.reflect.Method
 
 object CloudMusic : YukiBaseHooker() {
+    private const val TAG: String = "CloudMusic"
     private val playProgressHooker by lazy { PlayProgressHooker() }
 
     init {
@@ -43,7 +45,7 @@ object CloudMusic : YukiBaseHooker() {
 
     override fun onHook() {
         when (processName) {
-            "com.netease.cloudmusic:play" -> playProgressHooker.onHook()
+            "com.netease.cloudmusic" -> playProgressHooker.onHook()
         }
     }
 
@@ -125,6 +127,7 @@ object CloudMusic : YukiBaseHooker() {
             }
             newProvider.register()
             this.provider = newProvider
+            Log.d(TAG, "Provider registered")
         }
 
         /**

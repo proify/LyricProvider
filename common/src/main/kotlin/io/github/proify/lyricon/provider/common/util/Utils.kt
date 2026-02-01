@@ -15,6 +15,7 @@ import de.robv.android.xposed.XposedHelpers
  */
 object Utils {
     fun openBluetoothA2dpOn(classLoader: ClassLoader?) {
+        if (classLoader == null) return
         XposedHelpers.findAndHookMethod(
             "android.media.AudioManager",
             classLoader,
