@@ -21,6 +21,7 @@ import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
 import io.github.proify.lyricon.provider.common.extensions.toPairMap
 import io.github.proify.lyricon.spotifyprovider.xposed.api.NoFoundLyricException
+import io.github.proify.lyricon.spotifyprovider.xposed.api.SpotifyApi
 import io.github.proify.lyricon.spotifyprovider.xposed.api.response.LyricResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,8 +33,6 @@ import kotlinx.coroutines.launch
 import java.lang.reflect.Method
 
 object Spotify : YukiBaseHooker(), DownloadCallback {
-    private var AUTHORIZATION: String = ""
-    private var CLIENT_TOKEN: String = ""
 
     private const val TAG = "SpotifyProvider"
     private var isPlaying = false
@@ -79,16 +78,18 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
         positionJob = null
     }
 
-    private const val OPTIONAL_KEY = "Optional.of("
     private fun readPosition(): Long {
         return try {
             val any = positionMethod?.invoke(playerState, System.currentTimeMillis())
-            // val a = XposedHelpers.getObjectField(any, "a")
-            // YLog.debug(tag = TAG, msg = "Position: ${any?.javaClass}")
-            // if (a is Number) a.toLong() else 0
             val str = any.toString()
-            val num = str.substring(OPTIONAL_KEY.length, str.length - 1)
-            return num.toLong()
+            val start = str.indexOf('(')
+            val end = str.indexOf(')')
+            if (start != -1 && end != -1) {
+                val value = str.substring(start + 1, end)
+                return if (value.isNotBlank()) value.toLong() else 0
+            } else {
+                0
+            }
         } catch (e: Exception) {
             YLog.error(tag = TAG, msg = "Failed to read position", e = e)
             0
@@ -117,11 +118,18 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
                 after {
                     val arg = args[0] as? Array<*> ?: return@after
                     val map = arg.toPairMap()
-//                    map.forEach { (string, string1) ->
-//                        Log.d(TAG, "Header: $string = $string1")
-//                    }
-                    map["Authorization"]?.let { if (it.isNotBlank()) AUTHORIZATION = it }
-                    map["client-token"]?.let { if (it.isNotBlank()) CLIENT_TOKEN = it }
+
+                    map.forEach { (key, value) ->
+                        when (key) {
+                            "Authorization" -> SpotifyApi.headers["authorization"] = value
+                            "client-token" -> SpotifyApi.headers["client-token"] = value
+                            "user-agent" -> SpotifyApi.headers["user-agent"] = value
+                            "spotify-app-version" -> SpotifyApi.headers["spotify-app-version"] =
+                                value
+
+                            "x-client-id" -> SpotifyApi.headers["x-client-id"] = value
+                        }
+                    }
                 }
             }
     }
@@ -175,7 +183,7 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
     }
 
     private fun onTrackIdChanged(trackId: String) {
-        Downloader.download(trackId, AUTHORIZATION, CLIENT_TOKEN, this)
+        Downloader.download(trackId, this)
     }
 
     private fun dispatchPlaybackState(state: Int) {
