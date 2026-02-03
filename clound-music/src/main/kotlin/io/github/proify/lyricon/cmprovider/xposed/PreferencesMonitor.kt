@@ -62,7 +62,7 @@ class PreferencesMonitor(
     }
 
     fun isTranslationSelected(preference: SharedPreferences? = this.lazyGetSharedPreferences()): Boolean =
-        preference?.getInt("showLyricSetting", -1) == 0
+        preference?.getInt("showLyricSetting", -1) in 0..1
 
     interface PreferenceCallback {
         fun onTranslationOptionChanged(isTranslationSelected: Boolean)
