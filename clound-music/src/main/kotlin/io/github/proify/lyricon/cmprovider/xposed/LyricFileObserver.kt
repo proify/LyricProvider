@@ -10,7 +10,6 @@ import android.content.Context
 import android.os.FileObserver
 import java.io.File
 
-@Suppress("DEPRECATION")
 class LyricFileObserver(context: Context, callback: FileObserverCallback) {
 
     private val watchDirs by lazy {
@@ -29,6 +28,7 @@ class LyricFileObserver(context: Context, callback: FileObserverCallback) {
         watchDirs.map { dir ->
             if (!dir.exists()) dir.mkdirs()
 
+            @Suppress("DEPRECATION")
             object : FileObserver(dir.absolutePath, CREATE or DELETE or MODIFY) {
                 override fun onEvent(event: Int, path: String?) {
                     if (path == null) return

@@ -6,41 +6,58 @@
 
 package io.github.proify.lrckit
 
-import io.github.proify.lrckit.model.LrcData
-import io.github.proify.lrckit.model.LrcLine
+import io.github.proify.lyricon.lyric.model.LyricLine
 
 /**
  * LRC 歌词解析器
- * 支持标准及扩展 LRC 格式，包括多时间标签、毫秒/百分秒处理。
+ *
+ * ## 支持的格式
+ * 1. **标准格式**: `[00:12.34]` (百分秒)
+ * 2. **高精度格式**: `[00:12.345]` (毫秒)
+ * 3. **非标冒号格式**: `[00:12:34]` 或 `[00:12:345]` (fix: 兼容部分平台导出的冒号分隔符)
+ * 4. **简易格式**: `[00:12]` (无小数部分)
+ * 5. **多时间标签**: `[00:12.00][00:45.00]文本内容` (同一行歌词对应多个时间点)
+ * 6. **分钟溢出**: `[120:00.00]` (支持超过 99 分钟的长音频)
  */
 object LrcParser {
 
-    // 支持多种时间格式：[00:00.00] (百分秒), [00:00:00] (冒号分隔), [00:00.000] (毫秒)
-    private val TIME_TAG_REGEX = Regex("""\[(\d+):(\d{1,2})(?:[.:](\d+))?]""")
+    /**
+     * 时间标签正则表达式
+     *
+     * 匹配逻辑说明：
+     * - `(\d+)`: 分钟，支持 1 位或多位数字。
+     * - `(\d{1,2})`: 秒数，通常为 2 位。
+     * - `([.:](\d{1,3}))?`: 小数部分。
+     * - `[.:]`: 兼容点号 `.` 或冒号 `:` 分隔符 (修复兼容性问题 30373825)。
+     * - `(\d{1,3})`: 匹配 1-3 位数字（毫秒、百分秒或十分之一秒）。
+     */
+    private val TIME_TAG_REGEX = Regex("""\[(\d+):(\d{1,2})(?:[.:](\d{1,3}))?]""")
 
-    // 元数据正则：匹配 [ti:标题], [ar:歌手] 等
+    /**
+     * 元数据标签正则表达式 (如 [ti:Song Title])
+     */
     private val META_TAG_REGEX = Regex("""\[(\w+)\s*:\s*([^]]*)]""")
 
     /**
      * 解析 LRC 原始字符串
-     * @param raw 歌词文本内容
-     * @return 包含元数据和行数据的 [LrcData]
+     *
+     * @param raw 原始歌词文本
+     * @param duration 音频总时长，用于计算最后一行歌词的结束时间
+     * @return 包含解析后的元数据和歌词行的 [LrcDocument]
      */
-    fun parseLrc(raw: String?): LrcData {
-        if (raw.isNullOrBlank()) return LrcData(emptyMap(), emptyList())
+    fun parseLrc(raw: String?, duration: Long = 0): LrcDocument {
+        if (raw.isNullOrBlank()) return LrcDocument(emptyMap(), emptyList())
 
-        val tempEntries = mutableListOf<LrcLine>()
+        val tempEntries = mutableListOf<LyricLine>()
         val metaData = mutableMapOf<String, String>()
 
         raw.lineSequence().forEach { line ->
             val trimmed = line.trim()
-            // 过滤无效行：空行或非标签起始行
             if (trimmed.isBlank() || !trimmed.startsWith("[")) return@forEach
 
             val timeMatches = TIME_TAG_REGEX.findAll(trimmed).toList()
 
             if (timeMatches.isNotEmpty()) {
-                // 处理“一文多时”情况，例如：[00:12.00][00:45.00]相同的歌词
                 // 内容定义为最后一个时间标签之后的所有文本
                 val lastMatch = timeMatches.last()
                 val content = trimmed.substring(lastMatch.range.last + 1).trim()
@@ -49,64 +66,58 @@ object LrcParser {
                     val ms = parseTimeToMs(
                         min = match.groupValues[1],
                         sec = match.groupValues[2],
-                        frac = match.groupValues[3]
+                        frac = match.groupValues.getOrNull(3) // 对应 (\d{1,3})
                     )
-                    tempEntries.add(LrcLine(start = ms, text = content))
+                    tempEntries.add(LyricLine(begin = ms, text = content))
                 }
             } else {
-                // 尝试匹配元数据 (如 [ar:歌手])，仅当没有时间标签时执行
+                // 尝试匹配元数据
                 META_TAG_REGEX.matchEntire(trimmed)?.let { match ->
                     metaData[match.groupValues[1]] = match.groupValues[2].trim()
                 }
             }
         }
 
-        if (tempEntries.isEmpty()) return LrcData(metaData, emptyList())
+        if (tempEntries.isEmpty()) return LrcDocument(metaData, emptyList())
 
-        // 1. 必须排序：处理多标签导致的时间乱序
-        val sortedInitial = tempEntries.sortedBy { it.start }
-
-        // 2. 补全每一行的持续时间 (Duration) 和结束时间 (End)
-        val resultLines = mutableListOf<LrcLine>()
-        for (i in sortedInitial.indices) {
-            val current = sortedInitial[i]
-            // 下一行的开始即为本行的结束
-            val nextStart = if (i + 1 < sortedInitial.size) sortedInitial[i + 1].start else null
-
-            // 兜底策略：最后一行默认显示 5 秒，或者直到视频/音频结束
-            val end = nextStart ?: (current.start + 5000)
-            resultLines.add(
-                current.copy(
-                    end = end,
-                    duration = end - current.start
-                )
+        // 按开始时间排序并计算每行持续时间
+        val sortedInitial = tempEntries.sortedBy { it.begin }
+        val resultLines = sortedInitial.mapIndexed { index, current ->
+            val nextStart =
+                if (index + 1 < sortedInitial.size) sortedInitial[index + 1].begin else null
+            val end =
+                nextStart ?: if (duration > 0) duration else current.begin + 5000L
+            current.copy(
+                end = end,
+                duration = end - current.begin
             )
         }
 
-        return LrcData(metaData, resultLines)
+        return LrcDocument(metaData, resultLines)
     }
 
     /**
-     * 将时间标签转换为毫秒值
-     * 关键逻辑：正确处理分数位 (frac) 的权重。
-     * .5 -> 500ms
-     * .05 -> 50ms
-     * .005 -> 5ms
+     * 将时间标签的分量转换为毫秒
+     *
+     * 精度处理逻辑：
+     * - 1位 (如 .5): 5 * 100 = 500ms
+     * - 2位 (如 .05): 05 * 10 = 50ms (标准 LRC 百分秒)
+     * - 3位 (如 .005): 005 = 5ms (高精度毫秒)
+     *
+     * @param min 分钟部分
+     * @param sec 秒部分
+     * @param frac 小数部分（毫秒/百分秒），可能为 null
      */
     private fun parseTimeToMs(min: String, sec: String, frac: String?): Long {
         val m = min.toLongOrNull() ?: 0L
         val s = sec.toLongOrNull() ?: 0L
 
-        val ms = when {
-            frac.isNullOrEmpty() -> 0L
-            // 只有一位数，认为是十分之一秒 (1 = 100ms)
-            frac.length == 1 -> frac.toLong() * 100
-            // 两位数，认为是百分之一秒 (标准 LRC 格式, 01 = 10ms)
-            frac.length == 2 -> frac.toLong() * 10
-            // 三位数，直接是毫秒
-            frac.length == 3 -> frac.toLong()
-            // 超过三位截取前三位
-            else -> frac.substring(0, 3).toLong()
+        val ms = when (frac?.length) {
+            null, 0 -> 0L
+            1 -> frac.toLong() * 100
+            2 -> frac.toLong() * 10
+            3 -> frac.toLong()
+            else -> frac.substring(0, 3).toLongOrNull() ?: 0L
         }
 
         return m * 60000 + s * 1000 + ms

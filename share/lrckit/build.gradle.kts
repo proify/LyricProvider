@@ -21,5 +21,6 @@ kotlin {
 
 dependencies {
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.lyricon.lyric.model)
     testImplementation(kotlin("test"))
 }

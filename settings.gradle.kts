@@ -6,6 +6,9 @@
 
 @file:Suppress("UnstableApiUsage")
 
+include(":share:yrckit")
+
+
 include(":share:cloudlyric")
 
 
@@ -42,9 +45,8 @@ include(":share:lrckit")
 include(":apple-music")
 include(":clound-music")
 include(":qq-music")
-
 include(":kugou-music")
 include(":kuwo-music")
-
 include(":spotify-music")
 include(":lx-music")
+include(":youtube-music")

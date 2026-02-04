@@ -6,14 +6,10 @@
 
 package io.github.proify.qrckit
 
-import io.github.proify.qrckit.model.LyricLine
-import io.github.proify.qrckit.model.LyricWord
+import io.github.proify.lyricon.lyric.model.LyricLine
+import io.github.proify.lyricon.lyric.model.LyricWord
 import io.github.proify.qrckit.model.QrcData
 
-/**
- * QRC 歌词解析器
- * 用于解析标准的 QRC (QQ Music Lyric) 格式。支持解析 XML 封装格式及纯文本格式。
- */
 object QrcParser {
 
     // 匹配行级时间标签，格式如：[开始时间,持续时间]，例如 [1000,2500]
@@ -92,7 +88,7 @@ object QrcParser {
         }
 
         // QRC 可能存在无序排列，按开始时间统一排序以保证渲染正常
-        return metaData to lines.sortedBy { it.start }
+        return metaData to lines.sortedBy { it.begin }
     }
 
     /**
@@ -110,7 +106,7 @@ object QrcParser {
             // 过滤无效的负数时长数据
             if (wDur < 0) null else {
                 LyricWord(
-                    start = wStart,     // QRC 字时间通常为绝对时间
+                    begin = wStart,     // QRC 字时间通常为绝对时间
                     end = wStart + wDur,
                     duration = wDur,
                     text = text
@@ -126,7 +122,7 @@ object QrcParser {
         }
 
         return LyricLine(
-            start = lineStart,
+            begin = lineStart,
             duration = lineDur,
             end = lineStart + lineDur,
             text = finalText,

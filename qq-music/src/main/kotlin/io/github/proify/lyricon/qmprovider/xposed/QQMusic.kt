@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
+import io.github.proify.lyricon.lyric.model.RichLyricLine
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.lyric.model.lyricMetadataOf
 import io.github.proify.lyricon.provider.LyriconFactory
@@ -32,9 +33,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-
-typealias LyriconRichLyricLine = io.github.proify.lyricon.lyric.model.RichLyricLine
-typealias LyriconLyricWord = io.github.proify.lyricon.lyric.model.LyricWord
 
 object QQMusic : YukiBaseHooker() {
     private const val TAG = "Lyricon_QQMusic"
@@ -278,25 +276,18 @@ object QQMusic : YukiBaseHooker() {
 
         private fun LyricResponse.toLyriconSong(): Song {
             val cachedMetadata = MediaMetadataCache.get(id)
-            val mappedLyrics = lyricData.richLyricLines.map { line ->
-                LyriconRichLyricLine(
-                    begin = line.start, end = line.end, duration = line.duration,
-                    text = line.text, translation = filterTranslation(line.translation),
-                    words = line.words.map { word ->
-                        LyriconLyricWord(word.start, word.end, word.duration, word.text)
-                    }
-                )
-            }
+            val lyrics = parsedLyric.richLyricLines.removeInvalidTranslation()
             return Song(
                 id = id,
                 name = cachedMetadata?.title,
                 artist = cachedMetadata?.artist,
                 duration = cachedMetadata?.duration ?: 0,
-                lyrics = mappedLyrics
+                lyrics = lyrics
             )
         }
 
-        fun filterTranslation(translation: String?): String? =
-            if (translation?.trim() == "//") return null else translation
+        fun List<RichLyricLine>.removeInvalidTranslation() = apply {
+            forEach { if (it.translation?.trim() == "//") it.translation = null }
+        }
     }
 }

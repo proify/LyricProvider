@@ -8,8 +8,6 @@ package io.github.proify.cloudlyric.provider.qq
 
 import io.github.proify.cloudlyric.LyricsProvider
 import io.github.proify.cloudlyric.LyricsResult
-import io.github.proify.cloudlyric.lyric.LyricWord
-import io.github.proify.cloudlyric.lyric.RichLyricLine
 import io.github.proify.qrckit.QrcDownloader
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -48,20 +46,7 @@ class QQMusicProvider : LyricsProvider {
         return take.mapNotNull { song ->
             try {
                 val response = QrcDownloader.downloadLyrics(song.id.toString())
-
-                val richLyricLines = response.lyricData.richLyricLines.map { qRich ->
-                    RichLyricLine(
-                        start = qRich.start,
-                        end = qRich.end,
-                        duration = qRich.duration,
-                        text = qRich.text,
-                        translation = qRich.translation,
-                        roma = qRich.roma,
-                        words = qRich.words.map {
-                            LyricWord(it.start, it.end, it.duration, it.text)
-                        }
-                    )
-                }
+                val richLyricLines = response.parsedLyric.richLyricLines
 
                 LyricsResult(
                     trackName = song.name,

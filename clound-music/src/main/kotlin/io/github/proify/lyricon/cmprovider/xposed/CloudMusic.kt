@@ -14,7 +14,8 @@ import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.proify.lyricon.cmprovider.xposed.Constants.ICON
 import io.github.proify.lyricon.cmprovider.xposed.Constants.PROVIDER_PACKAGE_NAME
 import io.github.proify.lyricon.cmprovider.xposed.PreferencesMonitor.PreferenceCallback
-import io.github.proify.lyricon.cmprovider.xposed.parser.LyricParser
+import io.github.proify.lyricon.cmprovider.xposed.parser.ResponseParser
+import io.github.proify.lyricon.cmprovider.xposed.parser.toSong
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
@@ -153,7 +154,6 @@ object CloudMusic : YukiBaseHooker() {
         private fun performSyncLoad(metadata: MediaMetadataCache.Metadata) {
             val id = metadata.id
 
-            // 1. 默认构建一个基础 Song
             var targetSong = Song(
                 id = id,
                 name = metadata.title,
@@ -161,12 +161,12 @@ object CloudMusic : YukiBaseHooker() {
                 duration = metadata.duration
             )
 
-            // 2. 尝试读取歌词文件并解析
+            // 尝试读取歌词文件并解析
             val rawFile = lyricFileObserver?.getFile(id)
             if (rawFile != null && rawFile.exists()) {
                 try {
                     val jsonString = rawFile.readText()
-                    val response = LyricParser.parseResponse(jsonString)
+                    val response = ResponseParser.parse(jsonString)
                     val parsedSong = response.toSong()
 
                     if (!parsedSong.lyrics.isNullOrEmpty() && !response.pureMusic) {
@@ -177,7 +177,6 @@ object CloudMusic : YukiBaseHooker() {
                 }
             }
 
-            // 3. 直接推送到 Provider
             setSong(targetSong)
         }
 

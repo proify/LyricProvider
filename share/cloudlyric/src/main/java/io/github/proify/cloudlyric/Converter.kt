@@ -6,9 +6,9 @@
 
 package io.github.proify.cloudlyric
 
-import io.github.proify.cloudlyric.lyric.RichLyricLine
 import io.github.proify.lrckit.LrcParser
-import io.github.proify.lrckit.model.LrcLine
+import io.github.proify.lyricon.lyric.model.LyricLine
+import io.github.proify.lyricon.lyric.model.RichLyricLine
 import java.util.TreeMap
 
 /**
@@ -23,7 +23,7 @@ import java.util.TreeMap
  * @param threshold 允许的时间戳匹配误差（毫秒）
  * @return 组装后的 [RichLyricLine] 列表
  */
-fun List<LrcLine>.toRichLines(
+fun List<LyricLine>.toRichLines(
     transLrc: String? = null,
     romaLrc: String? = null,
     threshold: Long = 100L
@@ -35,12 +35,12 @@ fun List<LrcLine>.toRichLines(
 
     return this.map { line ->
         RichLyricLine(
-            start = line.start,
+            begin = line.begin,
             end = line.end,
             duration = line.duration,
             text = line.text,
-            translation = transMap?.findNearbyText(line.start, threshold),
-            roma = romaMap?.findNearbyText(line.start, threshold)
+            translation = transMap?.findNearbyText(line.begin, threshold),
+            roma = romaMap?.findNearbyText(line.begin, threshold)
         )
     }
 }
@@ -48,9 +48,9 @@ fun List<LrcLine>.toRichLines(
 /**
  * 将歌词行列表转换为 TreeMap 以支持范围查找。
  */
-private fun List<LrcLine>.toTreeMap(): TreeMap<Long, String> {
+private fun List<LyricLine>.toTreeMap(): TreeMap<Long, String> {
     val map = TreeMap<Long, String>()
-    this.forEach { map[it.start] = it.text }
+    this.forEach { map[it.begin] = it.text.orEmpty() }
     return map
 }
 

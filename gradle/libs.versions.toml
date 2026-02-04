@@ -6,7 +6,7 @@ junit = "4.13.2"
 junitVersion = "1.3.0"
 espressoCore = "3.7.0"
 kotlinxCoroutinesCore = "1.10.2"
-provider = "0.1.67"
+provider = "0.1.68"
 xposed = "82"
 yukihookapi = "1.3.1"
 ksp = "2.3.4"
@@ -25,6 +25,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 lyricon-provider = { module = "io.github.proify.lyricon:provider", version.ref = "provider" }
+lyricon-lyric-model = { module = "io.github.proify.lyricon.lyric:model", version.ref = "provider" }
 
 yukihookapi-api = { module = "com.highcapable.yukihookapi:api", version.ref = "yukihookapi" }
 yukihookapi-ksp-xposed = { module = "com.highcapable.yukihookapi:ksp-xposed", version.ref = "yukihookapi" }

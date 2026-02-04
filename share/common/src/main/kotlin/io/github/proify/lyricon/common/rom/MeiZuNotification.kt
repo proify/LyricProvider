@@ -9,9 +9,9 @@
 package io.github.proify.lyricon.common.rom
 
 import android.app.Notification
-import androidx.annotation.Keep
 
-@Keep
+//@Keep
+//请手动在文件里配置r8混淆规则
 open class MeiZuNotification : Notification() {
     companion object {
         const val FLAG_ALWAYS_SHOW_TICKER_HOOK = 0x01000000

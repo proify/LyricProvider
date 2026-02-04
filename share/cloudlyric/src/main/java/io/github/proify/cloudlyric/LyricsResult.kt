@@ -6,7 +6,7 @@
 
 package io.github.proify.cloudlyric
 
-import io.github.proify.cloudlyric.lyric.RichLyricLine
+import io.github.proify.lyricon.lyric.model.RichLyricLine
 import kotlinx.serialization.Serializable
 
 /**

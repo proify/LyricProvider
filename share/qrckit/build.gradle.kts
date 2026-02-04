@@ -23,4 +23,5 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     testImplementation(kotlin("test"))
     implementation(project(":share:lrckit"))
+    implementation(libs.lyricon.lyric.model)
 }

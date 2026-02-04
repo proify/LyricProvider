@@ -9,14 +9,15 @@
 package io.github.proify.qrckit
 
 import io.github.proify.qrckit.decrypt.QrcDecrypter
-import io.github.proify.qrckit.model.LyricData
+import io.github.proify.qrckit.model.ParsedLyric
 import java.util.regex.Pattern
 
 data class LyricResponse(
     val id: String,
     val raw: String
 ) {
-    val lyricData: LyricData by lazy {
+
+    val parsedLyric: ParsedLyric by lazy {
         val lyrics = regexGetCData(raw, "content")
         val trans = regexGetCData(raw, "contentts")
         val roma = regexGetCData(raw, "contentroma")
@@ -25,7 +26,7 @@ data class LyricResponse(
         val decryptedTrans = QrcDecrypter.decrypt(trans)
         val decryptedRoma = QrcDecrypter.decrypt(roma)
 
-        LyricData(
+        ParsedLyric(
             decryptedLyrics,
             decryptedTrans,
             decryptedRoma

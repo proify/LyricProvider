@@ -11,6 +11,7 @@
       <w>kugou</w>
       <w>kuwo</w>
       <w>kwprovider</w>
+      <w>lrckit</w>
       <w>lrctype</w>
       <w>lxnetease</w>
       <w>lxprovider</w>
@@ -27,6 +28,7 @@
       <w>spotifyprovider</w>
       <w>temurin</w>
       <w>toside</w>
+      <w>ytprovider</w>
     </words>
   </dictionary>
 </component>

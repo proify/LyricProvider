@@ -6,6 +6,7 @@
 
 package io.github.proify.qrckit.model
 
+import io.github.proify.lyricon.lyric.model.LyricLine
 import kotlinx.serialization.Serializable
 
 @Serializable

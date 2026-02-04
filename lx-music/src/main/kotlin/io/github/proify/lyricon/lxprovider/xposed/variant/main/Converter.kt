@@ -25,19 +25,19 @@ object Converter {
     ): List<RichLyricLine> {
         val main = LrcParser.parseLrc(lyric).lines
         val transMap =
-            translation?.let { LrcParser.parseLrc(it).lines.associateBy { l -> l.start } }
-        val romaMap = roma?.let { LrcParser.parseLrc(it).lines.associateBy { l -> l.start } }
+            translation?.let { LrcParser.parseLrc(it).lines.associateBy { l -> l.begin } }
+        val romaMap = roma?.let { LrcParser.parseLrc(it).lines.associateBy { l -> l.begin } }
 
         return main
-            .filter { it.text.isNotBlank() }
+            .filter { !it.text.isNullOrBlank() }
             .map { m ->
                 RichLyricLine(
                     text = m.text,
-                    begin = m.start,
+                    begin = m.begin,
                     end = m.end,
                     duration = m.duration,
-                    translation = transMap?.get(m.start)?.text.takeIf { it != "//" }, //移除QQ音乐无效翻译
-                    roma = romaMap?.get(m.start)?.text
+                    translation = transMap?.get(m.begin)?.text.takeIf { it != "//" }, //移除QQ音乐无效翻译
+                    roma = romaMap?.get(m.begin)?.text
                 )
             }.normalize()
     }

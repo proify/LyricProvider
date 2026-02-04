@@ -20,7 +20,9 @@
             <option value="$PROJECT_DIR$/share/common" />
             <option value="$PROJECT_DIR$/share/lrckit" />
             <option value="$PROJECT_DIR$/share/qrckit" />
+            <option value="$PROJECT_DIR$/share/yrckit" />
             <option value="$PROJECT_DIR$/spotify-music" />
+            <option value="$PROJECT_DIR$/youtube-music" />
           </set>
         </option>
       </GradleProjectSettings>
