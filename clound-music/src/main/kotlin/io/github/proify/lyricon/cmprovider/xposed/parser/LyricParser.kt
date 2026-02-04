@@ -23,7 +23,7 @@ object LyricParser {
 
     private val jsonParser = Json { ignoreUnknownKeys = true }
 
-    private val LRC_TIME_REGEX = Pattern.compile("\\[(\\d{1,2}):(\\d{1,2})(\\.(\\d{1,3}))?]")
+    private val LRC_TIME_REGEX = Pattern.compile("\\[(\\d{1,2}):(\\d{1,2})([.:](\\d{1,3}))?]")
     private val YRC_LINE_HEADER_REGEX = Pattern.compile("\\[(\\d+),(\\d+)]")
     private val YRC_SYLLABLE_REGEX = Pattern.compile("\\((\\d+),(\\d+),\\d+\\)([^(]*)")
 
