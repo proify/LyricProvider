@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="108dp"
+  android:height="108dp"
+  android:viewportWidth="108"
+  android:viewportHeight="108">
+
+  <!-- 使用深色底色，更有沉浸感 -->
+  <path
+    android:fillColor="@color/ic_launcher_background"
+    android:pathData="M0,0h108v108h-108z" />
+
+  <!-- 添加一个淡淡的径向渐变感的装饰性圆环 -->
+  <path
+    android:fillColor="#0DFFFFFF"
+    android:pathData="M54,10C29.7,10 10,29.7 10,54C10,78.3 29.7,98 54,98C78.3,98 98,78.3 98,54C98,29.7 78.3,10 54,10ZM54,92C33.01,92 16,74.99 16,54C16,33.01 33.01,16 54,16C74.99,16 92,33.01 92,54C92,74.99 74.99,92 54,92Z" />
+</vector>

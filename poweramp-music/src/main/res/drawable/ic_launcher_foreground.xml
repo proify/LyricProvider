@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+  android:width="108dp"
+  android:height="108dp"
+  android:viewportWidth="108"
+  android:viewportHeight="108">
+
+  <!-- 为了防止图标过大被系统裁切，缩放并居中 -->
+  <group
+    android:pivotX="54"
+    android:pivotY="54"
+    android:scaleX="0.65"
+    android:scaleY="0.65">
+
+    <!-- 外圈圆环 -->
+    <path
+      android:pathData="M54,54m-48,0a48,48 0 1,1 96,0a48,48 0 1,1 -96,0"
+      android:strokeWidth="6"
+      android:strokeColor="@color/ic_launcher_foreground"
+      android:fillColor="#00000000" />
+
+    <!-- 中间的播放三角 (圆角处理，更现代) -->
+    <path
+      android:pathData="M42,34 L76,54 L42,74 Z"
+      android:fillColor="@color/ic_launcher_foreground"
+      android:strokeWidth="4"
+      android:strokeColor="@color/ic_launcher_foreground"
+      android:strokeLineJoin="round" />
+  </group>
+</vector>

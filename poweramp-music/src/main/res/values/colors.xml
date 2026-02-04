@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <!-- 黑白灰方案 - 浅色模式 -->
+  <color name="colorPrimary">#000000</color>
+  <color name="colorOnPrimary">#FFFFFF</color>
+
+  <!-- 背景与卡片 -->
+  <color name="colorSurface">#FFFFFF</color>
+  <color name="colorOnSurface">#121212</color> <!-- 近纯黑，提高可读性 -->
+  <color name="colorSurfaceVariant">#F5F5F5</color> <!-- 极浅灰，用于卡片背景 -->
+  <color name="colorOnSurfaceVariant">#424242</color> <!-- 深灰，用于描述，确保看清 -->
+
+  <!-- 分割线 -->
+  <color name="colorOutlineVariant">#EEEEEE</color>
+
+  <!-- 图标 -->
+  <color name="ic_launcher_background">#FFFFFF</color>
+  <color name="ic_launcher_foreground">#000000</color>
+
+  <!-- 兼容旧引用 -->
+  <color name="purple_500">#000000</color>
+  <color name="teal_200">#424242</color>
+</resources>

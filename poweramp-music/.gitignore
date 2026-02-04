@@ -1,0 +1,4 @@
+/build
+*.jks
+*.keystore
+signing.properties

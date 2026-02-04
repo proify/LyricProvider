@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">PowerAmp歌词适配</string>
+    <string name="xposed_description">为词幕提供 PowerAmp 的歌词适配</string>
+
+    <!-- Settings Activity Strings -->
+    <string name="settings_title">插件设置</string>
+    <string name="category_display">显示设置</string>
+    <string name="title_translation">启用翻译</string>
+    <string name="desc_translation">如果歌词包含翻译，则尝试显示</string>
+
+    <string name="category_network">网络与存储</string>
+    <string name="title_net_search">联网搜索歌词</string>
+    <string name="desc_net_search">本地无歌词时自动从云端搜索</string>
+    <string name="title_auto_save">自动保存到本地</string>
+    <string name="desc_auto_save">将联网搜索到的歌词保存为同名 LRC 文件</string>
+
+    <string name="footer_text">PowerAmp Lyric Provider v1.0.0\n为词幕提供歌词</string>
+
+    <!-- Lyricon Module Metadata -->
+    <string name="lyricon_module_description">PowerAmp 音乐播放器歌词适配器，支持内嵌歌词读取、同名LRC读取和网络获取歌词。</string>
+    <string name="lyricon_module_category">本地播放器</string>
+    <string name="lyricon_module_author">newcovid</string>
+</resources>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.LyricProvider">
+
+        <!-- 注册设置页面 Activity，并设为启动入口 -->
+        <activity
+            android:name=".ui.SettingsActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.LyricProvider">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Xposed 插件元数据 -->
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+
+        <meta-data
+            android:name="xposeddescription"
+            android:value="@string/xposed_description" />
+
+        <meta-data
+            android:name="xposedminversion"
+            android:value="53" />
+
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
+
+        <meta-data
+            android:name="xposedsharedprefs"
+            android:value="true" />
+
+        <!-- Lyricon 插件元数据 -->
+        <meta-data
+            android:name="lyricon_module"
+            android:value="true" />
+        <meta-data
+            android:name="lyricon_module_author"
+            android:value="@string/lyricon_module_author" />
+        <meta-data
+            android:name="lyricon_module_description"
+            android:value="@string/lyricon_module_description" />
+        <meta-data
+            android:name="lyricon_module_category"
+            android:value="@string/lyricon_module_category" />
+        <meta-data
+            android:name="lyricon_module_tags"
+            android:resource="@array/lyricon_module_tags" />
+
+    </application>
+
+</manifest>

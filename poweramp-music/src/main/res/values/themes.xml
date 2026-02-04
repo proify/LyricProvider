@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="Theme.LyricProvider" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- 核心配色映射 -->
+    <item name="colorPrimary">@color/colorPrimary</item>
+    <item name="colorOnPrimary">@color/colorOnPrimary</item>
+    <item name="colorSurface">@color/colorSurface</item>
+    <item name="colorOnSurface">@color/colorOnSurface</item>
+    <item name="colorSurfaceVariant">@color/colorSurfaceVariant</item>
+    <item name="colorOnSurfaceVariant">@color/colorOnSurfaceVariant</item>
+    <item name="colorOutlineVariant">@color/colorOutlineVariant</item>
+
+    <!-- 状态栏控制 -->
+    <item name="android:windowTranslucentStatus">false</item>
+    <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    <item name="android:statusBarColor">?attr/colorSurface</item>
+    <item name="android:windowLightStatusBar">true</item> <!-- 浅色模式下状态栏图标为深色 -->
+  </style>
+</resources>
