@@ -1,0 +1,11 @@
+<!--
+  ~ Copyright 2026 Proify, Tomakino
+  ~ Licensed under the Apache License, Version 2.0
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  -->
+
+<resources>
+    <string name="app_name">椒盐音乐歌词支持</string>
+    <string name="xposed_description">椒盐音乐歌词支持</string>
+    <string name="lyricon_module_description">椒盐音乐歌词支持，需开启魅族状态栏歌词。</string>
+</resources>
