@@ -49,6 +49,10 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
     private var lastPlaybackState: PlaybackState? = null
     private var curMetadata: TrackMetadata? = null
 
+    // 用于处理粘性广播的暂存 Intent
+    @Volatile
+    private var pendingTrackIntent: Intent? = null
+
     private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var progressJob: Job? = null
     private var receiver: BroadcastReceiver? = null
@@ -93,6 +97,16 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
                         val state = args[0] as? PlaybackState ?: return@after
                         lastPlaybackState = state
 
+                        // 状态激活检查：补发之前被拦截的粘性广播
+                        if (isPlaybackActive(state)) {
+                            val pending = pendingTrackIntent
+                            if (pending != null) {
+                                YLog.debug(tag = TAG, msg = "Playback active, processing pending sticky track intent")
+                                handleTrackChange(pending)
+                                pendingTrackIntent = null
+                            }
+                        }
+
                         if (state.state == PlaybackState.STATE_PLAYING) {
                             startSyncPositionTask()
                         } else if (state.state == PlaybackState.STATE_PAUSED
@@ -103,6 +117,23 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
                     }
                 }
             }
+    }
+
+    /**
+     * 判断当前播放状态是否属于“活跃”状态 (播放或暂停，而非停止/错误)
+     */
+    private fun isPlaybackActive(state: PlaybackState?): Boolean {
+        if (state == null) return false
+        return when (state.state) {
+            PlaybackState.STATE_PLAYING,
+            PlaybackState.STATE_PAUSED,
+            PlaybackState.STATE_BUFFERING,
+            PlaybackState.STATE_FAST_FORWARDING,
+            PlaybackState.STATE_REWINDING,
+            PlaybackState.STATE_SKIPPING_TO_NEXT,
+            PlaybackState.STATE_SKIPPING_TO_PREVIOUS -> true
+            else -> false // STATE_STOPPED, STATE_NONE, STATE_ERROR, STATE_CONNECTING
+        }
     }
 
     /**
@@ -144,6 +175,15 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
 
         receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
+                // 处理粘性广播逻辑：如果应用刚启动收到历史广播且当前未播放，则拦截
+                if (isInitialStickyBroadcast && !isPlaybackActive(lastPlaybackState)) {
+                    YLog.debug(tag = TAG, msg = "Sticky broadcast detected while inactive, pending track change")
+                    pendingTrackIntent = intent
+                    return
+                }
+                // 如果不是 Sticky 或已激活，清除挂起的 Intent（新的覆盖旧的）
+                pendingTrackIntent = null
+
                 when (intent.action) {
                     ACTION_TRACK_CHANGED -> handleTrackChange(intent)
                     ACTION_STATUS_CHANGED -> handleStatusChange(intent)
