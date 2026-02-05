@@ -22,7 +22,7 @@
 | 平台              | 状态      | 下载                                                                                     | 说明               |
 |:----------------|:--------|----------------------------------------------------------------------------------------|:-----------------|
 | **Apple Music** | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=apple,-music)     | 支持动态歌词/翻译        |
-| **网易云音乐**       | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=clound%2Dmusic)   | 支持动态歌词/翻译        |
+| **网易云音乐**       | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=clound,-music)    | 支持动态歌词/翻译        |
 | **QQ音乐**        | 🟢 稳定   | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=qq%2Dmusic)       | 支持动态歌词/翻译        |
 | **光锥音乐**        | 🟢稳定    | [查看](https://coneplayer.trantor.ink/)                                                  | 由开发者适配           |
 | **LX音乐**        | 🟢稳定    | [查看](https://github.com/proify/LyricProvider/releases/latest#:~:text=lx%2Dmusic)       | 支持翻译             |
