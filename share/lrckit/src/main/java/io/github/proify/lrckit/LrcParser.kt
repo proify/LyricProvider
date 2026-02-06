@@ -4,141 +4,91 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-@file:Suppress("unused")
-
 package io.github.proify.lrckit
 
 import io.github.proify.lyricon.lyric.model.LyricLine
+import java.util.regex.Pattern
 
 /**
- * LRC 歌词解析器。
- *
- * 用于解析标准及非标准 LRC 歌词文本，支持多时间标签、小时字段及高精度毫秒。
- *
- * ### 支持的格式示例
- * - **标准格式**: `[00:12.34]` (百分秒)
- * - **扩展小时格式**: `[01:02:03.45]` (支持超过一小时的音频)
- * - **高精度格式**: `[00:12.345]` (毫秒级别)
- * - **非标兼容**: `[00:12:34]` (冒号分隔小数位) 或 `[00:12]` (无小数)
- * - **溢出分钟**: `[120:00.00]` (支持超过 99 分钟)
+ * LRC 解析器。
+ * 针对网易云等平台非标格式优化，强制降级解析 [mm:ss:ms]，防止小时级偏移错误。
  */
 object LrcParser {
 
-    /**
-     * 时间标签正则表达式。
-     *
-     * 捕获组说明：
-     * 1. `groupValues[1]`: 小数部分前的 **小时** (可选)。
-     * 2. `groupValues[2]`: **分钟** (必须)。
-     * 3. `groupValues[3]`: **秒数** (必须)。
-     * 4. `groupValues[4]`: **小数部分** (可选，匹配 1-3 位数字)。
-     *
-     * 匹配逻辑：
-     * `\[(?:(\d+):)?(\d+):(\d{1,2})(?:[.:](\d{1,3}))?]`
-     */
-    private val TIME_TAG_REGEX = Regex("""\[(?:(\d+):)?(\d+):(\d{1,2})(?:[.:](\d{1,3}))?]""")
+    private val LINE_PATTERN =
+        Pattern.compile("""^\[(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?](.*)""")
+    private val TAG_PATTERN = Pattern.compile("""\[(\d{1,3})[ :.](\d{2})(?:[ :.](\d{1,3}))?]""")
 
     /**
-     * 元数据标签正则表达式 (例如: `[ti:歌名]`, `[ar:歌手]`)。
-     *
-     * 捕获组说明：
-     * 1. `key`: 标签名称。
-     * 2. `value`: 标签内容。
-     */
-    private val META_TAG_REGEX = Regex("""\[(\w+)\s*:\s*([^]]*)]""")
-
-    /**
-     * 解析 LRC 原始字符串。
-     *
-     * @param raw 原始歌词文本字符串。
-     * @param duration 音频总时长（毫秒），若提供则用于修正最后一行歌词的结束时间。
-     * @return 返回包含元数据和已排序歌词行列表的 [LrcDocument]。
+     * 解析原始歌词。
+     * @param raw 原始文本，自动过滤非 '[' 开头的干扰行（如 JSON）。
+     * @param duration 音频总时长，用于修正末行结束时间。
      */
     fun parse(raw: String?, duration: Long = 0): LrcDocument {
         if (raw.isNullOrBlank()) return LrcDocument(emptyMap(), emptyList())
 
-        val tempEntries = mutableListOf<LyricLine>()
-        val metaData = mutableMapOf<String, String>()
+        val entries = mutableListOf<LyricLine>()
+        val meta = mutableMapOf<String, String>()
 
         raw.lineSequence().forEach { line ->
             val trimmed = line.trim()
-            // 快速跳过无效行
-            if (trimmed.isBlank() || !trimmed.startsWith("[")) return@forEach
+            if (trimmed.isEmpty() || !trimmed.startsWith("[")) return@forEach
 
-            val timeMatches = TIME_TAG_REGEX.findAll(trimmed).toList()
-
-            if (timeMatches.isNotEmpty()) {
-                // 歌词内容通常位于最后一个时间标签之后
-                val lastMatch = timeMatches.last()
-                val content = trimmed.substring(lastMatch.range.last + 1).trim()
-
-                timeMatches.forEach { match ->
-                    val ms = parseTimeToMs(
-                        hour = match.groupValues[1],
-                        min = match.groupValues[2],
-                        sec = match.groupValues[3],
-                        frac = match.groupValues.getOrNull(4)
+            val matcher = LINE_PATTERN.matcher(trimmed)
+            if (matcher.matches()) {
+                // 提取最后一个 ']' 之后的内容作为正文
+                val content = trimmed.substring(trimmed.lastIndexOf(']') + 1).trim()
+                val tagMatcher = TAG_PATTERN.matcher(trimmed)
+                while (tagMatcher.find()) {
+                    entries.add(
+                        LyricLine(
+                            begin = toMs(
+                                tagMatcher.group(1),
+                                tagMatcher.group(2),
+                                tagMatcher.group(3)
+                            ),
+                            text = content
+                        )
                     )
-                    tempEntries.add(LyricLine(begin = ms, text = content))
                 }
             } else {
-                // 若非时间标签，则尝试解析为元数据（如 [ar:歌手]）
-                META_TAG_REGEX.matchEntire(trimmed)?.let { match ->
-                    metaData[match.groupValues[1]] = match.groupValues[2].trim()
-                }
+                parseMeta(trimmed, meta)
             }
         }
-
-        if (tempEntries.isEmpty()) return LrcDocument(metaData, emptyList())
-
-        // 核心逻辑：按时间轴排序并填充结束时间(end)和时长(duration)
-        val sortedInitial = tempEntries.sortedBy { it.begin }
-        val resultLines = sortedInitial.mapIndexed { index, current ->
-            val nextStart = if (index + 1 < sortedInitial.size) {
-                sortedInitial[index + 1].begin
-            } else {
-                null
-            }
-
-            // 策略：若无下一行，优先使用总时长，否则默认展示 5 秒
-            val end = nextStart ?: if (duration > 0) duration else current.begin + 5000L
-
-            current.copy(
-                end = end,
-                duration = end - current.begin
-            )
-        }
-
-        return LrcDocument(metaData, resultLines)
+        return finalize(entries, meta, duration)
     }
 
     /**
-     * 将解析出的时间各分量转换为统一的毫秒数。
-     *
-     * 小数部分 (frac) 精度自适应处理：
-     * - `1位` (如 .5): 视为 500ms (5 * 100)
-     * - `2位` (如 .05): 视为 50ms (05 * 10)，标准的 LRC 百分秒格式
-     * - `3位` (如 .005): 视为 5ms，高精度格式
-     *
-     * @param hour 小时字符串 (允许为 null 或空)。
-     * @param min 分钟字符串 (非空数字)。
-     * @param sec 秒数字符串 (非空数字)。
-     * @param frac 小数部分字符串 (如 "34" 代表 340ms 或 34ms，取决于长度)。
-     * @return 转换后的总毫秒数 [Long]。
+     * 时间转毫秒。强制识别为 [分:秒:毫秒]，自适应毫秒位数。
      */
-    private fun parseTimeToMs(hour: String?, min: String, sec: String, frac: String?): Long {
-        val h = hour?.toLongOrNull() ?: 0L
-        val m = min.toLongOrNull() ?: 0L
-        val s = sec.toLongOrNull() ?: 0L
-
-        val ms = when (frac?.length) {
-            null, 0 -> 0L
-            1 -> frac.toLong() * 100
-            2 -> frac.toLong() * 10
-            3 -> frac.toLong()
-            else -> frac.substring(0, 3).toLongOrNull() ?: 0L
+    private fun toMs(mStr: String, sStr: String, fStr: String?): Long {
+        val m = mStr.toLongOrNull() ?: 0L
+        val s = sStr.toLongOrNull() ?: 0L
+        val ms = when (fStr?.length) {
+            1 -> fStr.toLong() * 100 // [ss:5] -> 500ms
+            2 -> fStr.toLong() * 10  // [ss:50] -> 500ms
+            3 -> fStr.toLong()       // [ss:500] -> 500ms
+            else -> 0L
         }
+        return m * 60000 + s * 1000 + ms
+    }
 
-        return (h * 3600000L) + (m * 60000L) + (s * 1000L) + ms
+    private fun parseMeta(line: String, meta: MutableMap<String, String>) {
+        val colon = line.indexOf(":")
+        if (colon > 1 && line.endsWith("]")) {
+            val key = line.substring(1, colon).trim()
+            val value = line.substring(colon + 1, line.length - 1).trim()
+            meta[key] = value
+        }
+    }
+
+    private fun finalize(list: List<LyricLine>, meta: Map<String, String>, dur: Long): LrcDocument {
+        val sorted = list.sortedBy { it.begin }
+        val lines = sorted.mapIndexed { i, cur ->
+            val next = sorted.getOrNull(i + 1)?.begin
+            val end = next ?: if (dur > cur.begin) dur else cur.begin + 5000L
+            cur.copy(end = end, duration = end - cur.begin)
+        }
+        return LrcDocument(meta, lines)
     }
 }

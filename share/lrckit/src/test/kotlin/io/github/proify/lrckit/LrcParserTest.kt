@@ -8,11 +8,28 @@
 
 package io.github.proify.lrckit
 
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import kotlin.test.Test
 
 class LrcParserTest {
+
+    @Test
+    fun testSpecialLyrics() {
+        val raw = readFile("eva.json")
+        val lrc =
+            Json.parseToJsonElement(raw).jsonObject["lrc"]?.jsonPrimitive?.contentOrNull
+        val result = EnhanceLrcParser.parse(lrc)
+        result.lines.forEach {
+            println("$it")
+        }
+
+    }
+
 
     @Test
     fun testLrcELRCDiff() {

@@ -6,7 +6,6 @@
 
 package io.github.proify.lyricon.cmprovider.xposed.parser
 
-import io.github.proify.lrckit.EnhanceLrcParser
 import io.github.proify.lrckit.LrcParser
 import io.github.proify.lyricon.cmprovider.xposed.MediaMetadataCache
 import io.github.proify.lyricon.lyric.model.LyricLine
@@ -42,16 +41,21 @@ fun LyricResponse.toSong(): Song {
 
 fun LyricResponse.toRichLines(): List<RichLyricLine> {
     val sourceLines: List<LyricLine> = when {
-        !yrc.isNullOrBlank() -> YrcParser.parse(yrc).ifEmpty { LrcParser.parse(lrc).lines }
+        !yrc.isNullOrBlank() -> YrcParser.parse(yrc).ifEmpty {
+            LrcParser.parse(lrc).lines
+        }
+
         !lrc.isNullOrBlank() -> LrcParser.parse(lrc).lines.ifEmpty { YrcParser.parse(yrc) }
         else -> return emptyList()
     }
+
+    //Log.d("LyricResponse", "Parsing lyrics for $sourceLines")
 
     val rawTranslate = yrcTranslateLyric.takeUnless { it.isNullOrBlank() }
         ?: lrcTranslateLyric.takeUnless { it.isNullOrBlank() }
 
     val translateMap = rawTranslate?.let {
-        val lines = EnhanceLrcParser.parse(it).lines
+        val lines = LrcParser.parse(it).lines
         TreeMap<Long, String>().apply {
             lines.forEach { line -> put(line.begin, line.text.orEmpty()) }
         }
@@ -69,6 +73,7 @@ fun LyricResponse.toRichLines(): List<RichLyricLine> {
             end = line.end,
             duration = line.duration,
             text = line.text,
+            words = line.words,
             translation = translationText
         )
     }
