@@ -10,7 +10,6 @@ import android.app.Notification
 import android.media.session.PlaybackState
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
-import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderLogo
@@ -114,8 +113,6 @@ object SaltPlayer : YukiBaseHooker() {
         try {
             provider.player.sendText(text)
         } catch (e: Exception) {
-            // 记录错误但继续运行
-            YLog.error(tag = "SaltPlayerProvider", msg = "Failed to send lyric to host", e = e)
         }
     }
 
