@@ -1,0 +1,11 @@
+<!--
+  ~ Copyright 2026 Proify, Tomakino
+  ~ Licensed under the Apache License, Version 2.0
+  ~ http://www.apache.org/licenses/LICENSE-2.0
+  -->
+
+<resources>
+    <string name="app_name">车载歌词支持</string>
+    <string name="xposed_description">对适配了车载歌词的播放器，将歌词数据提供给词幕。</string>
+    <string name="lyricon_module_description">对适配了车载歌词的播放器，将歌词数据提供给词幕。需在播放器设置中开启车载歌词功能。</string>
+</resources>

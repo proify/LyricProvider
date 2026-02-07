@@ -4,7 +4,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.github.proify.lyricon.kgprovider.xposed.kugou
+package io.github.proify.lyricon.library.carprovider
 
 import android.media.MediaMetadata
 import android.media.session.PlaybackState
@@ -14,12 +14,15 @@ import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
 import io.github.proify.lyricon.common.util.Utils
-import io.github.proify.lyricon.kgprovider.xposed.Constants
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderLogo
 
-open class KuGou(val tag: String = "KuGouProvider") : YukiBaseHooker() {
+open class CarProvider(
+    val providerPackageName: String,
+    val logo: ProviderLogo = ProviderLogo.fromBase64(Constants.ICON)
+) : YukiBaseHooker() {
+    private val tag = "CarProvider"
 
     private var currentPlayingState = false
     private var lyriconProvider: LyriconProvider? = null
@@ -45,9 +48,9 @@ open class KuGou(val tag: String = "KuGouProvider") : YukiBaseHooker() {
         val context = appContext ?: return
         lyriconProvider = LyriconFactory.createProvider(
             context = context,
-            providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
+            providerPackageName = providerPackageName,
             playerPackageName = context.packageName,
-            logo = ProviderLogo.fromBase64(Constants.ICON)
+            logo = logo
         ).apply { register() }
     }
 
@@ -69,6 +72,10 @@ open class KuGou(val tag: String = "KuGouProvider") : YukiBaseHooker() {
             }.hook {
                 after {
                     val metadata = args[0] as? MediaMetadata ?: return@after
+                    metadata.keySet().forEach { key ->
+                        val value = metadata.getString(key)
+                        YLog.debug(tag = tag, msg = "Metadata: $key=$value")
+                    }
                     val title = metadata.getString(MediaMetadata.METADATA_KEY_TITLE)
                     if (!title.isNullOrBlank()) {
                         lyriconProvider?.player?.sendText(title)
@@ -85,10 +92,12 @@ open class KuGou(val tag: String = "KuGouProvider") : YukiBaseHooker() {
 
         when (state) {
             PlaybackState.STATE_PLAYING -> applyPlaybackUpdate(true)
-            PlaybackState.STATE_PAUSED, PlaybackState.STATE_STOPPED -> mainHandler.postDelayed(
-                pauseRunnable,
-                50
-            )
+            PlaybackState.STATE_PAUSED, PlaybackState.STATE_STOPPED -> {
+                mainHandler.postDelayed(
+                    pauseRunnable,
+                    0
+                )
+            }
         }
     }
 

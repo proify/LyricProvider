@@ -38,10 +38,12 @@ include(":share:lrckit")
 include(":share:yrckit")
 include(":share:cloudlyric")
 include(":share:meizhu-provider")
+include(":share:car-provider")
 
 //apps
 include(":cloud-provider")
 include(":meizhu-provider")
+include(":car-provider")
 
 include(":apple-music")
 include(":163-music")
