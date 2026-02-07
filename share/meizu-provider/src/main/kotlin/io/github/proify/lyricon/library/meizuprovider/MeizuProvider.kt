@@ -4,7 +4,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.github.proify.lyricon.library.meizhuprovider
+package io.github.proify.lyricon.library.meizuprovider
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -18,7 +18,7 @@ import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderLogo
 
-open class MeizhuProvider(
+open class MeizuProvider(
     val providerPackageName: String,
     val logo: ProviderLogo = ProviderLogo.fromBase64(Constants.ICON)
 ) : YukiBaseHooker() {

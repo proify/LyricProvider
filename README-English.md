@@ -28,11 +28,11 @@ music applications.
 
 ### Universal & Special Modules
 
-| Module Name                  | Identifier (ID)   | Use Case                                                               |
-|:-----------------------------|:------------------|:-----------------------------------------------------------------------|
-| ☁️ **Cloud Provider**        | `cloud-provider`  | Generic matching via online lyric databases                            |
-| 📱 **Meizu Support**         | `meizhu-provider` | Works with any player supporting Meizu Status Bar lyrics               |
-| 🧂 **In-car lyrics Support** | `car-provider`    | Suitable for players that have been adapted for in-car lyrics display. |
+| Module Name                  | Identifier (ID)  | Use Case                                                               |
+|:-----------------------------|:-----------------|:-----------------------------------------------------------------------|
+| ☁️ **Cloud Provider**        | `cloud-provider` | Generic matching via online lyric databases                            |
+| 📱 **Meizu Support**         | `meizu-provider` | Works with any player supporting Meizu Status Bar lyrics               |
+| 🧂 **In-car lyrics Support** | `car-provider`   | Suitable for players that have been adapted for in-car lyrics display. |
 
 ### 🚀 Natively Supported (No Plugin Required)
 

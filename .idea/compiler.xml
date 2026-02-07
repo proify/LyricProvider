@@ -4,7 +4,9 @@
     <bytecodeTargetLevel target="17">
       <module name="LyricProvider.clound-music" target="21" />
       <module name="LyricProvider.common" target="21" />
+      <module name="LyricProvider.meizhu-provider" target="21" />
       <module name="LyricProvider.share.car-lyric-provider" target="21" />
+      <module name="LyricProvider.share.meizhu-provider" target="21" />
       <module name="LyricProvider.super-lyric-provider" target="21" />
       <module name="LyricProvider.youtube-music" target="21" />
     </bytecodeTargetLevel>

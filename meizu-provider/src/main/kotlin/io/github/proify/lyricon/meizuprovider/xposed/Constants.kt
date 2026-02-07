@@ -4,7 +4,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.github.proify.lyricon.meizhuprovider.xposed
+package io.github.proify.lyricon.meizuprovider.xposed
 
 object Constants {
     const val PROVIDER_PACKAGE_NAME = "io.github.proify.lyricon.meizhuprovider"

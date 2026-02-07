@@ -64,7 +64,7 @@ configure<ApplicationExtension> {
 
 dependencies {
     implementation(project(":share:common"))
-    implementation(project(":share:meizhu-provider"))
+    implementation(project(":share:meizu-provider"))
 
     implementation(libs.lyricon.provider)
     implementation(libs.kotlinx.serialization.json)

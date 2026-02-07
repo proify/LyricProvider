@@ -4,7 +4,7 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.github.proify.lyricon.library.meizhuprovider
+package io.github.proify.lyricon.library.meizuprovider
 
 internal object Constants {
     const val ICON: String =

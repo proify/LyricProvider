@@ -37,12 +37,12 @@ include(":share:qrckit")
 include(":share:lrckit")
 include(":share:yrckit")
 include(":share:cloudlyric")
-include(":share:meizhu-provider")
+include(":share:meizu-provider")
 include(":share:car-provider")
 
 //apps
 include(":cloud-provider")
-include(":meizhu-provider")
+include(":meizu-provider")
 include(":car-provider")
 
 include(":apple-music")

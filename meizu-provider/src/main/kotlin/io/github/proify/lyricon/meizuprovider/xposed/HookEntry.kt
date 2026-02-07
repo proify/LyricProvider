@@ -4,12 +4,12 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
-package io.github.proify.lyricon.meizhuprovider.xposed
+package io.github.proify.lyricon.meizuprovider.xposed
 
 import com.highcapable.yukihookapi.YukiHookAPI
 import com.highcapable.yukihookapi.annotation.xposed.InjectYukiHookWithXposed
 import com.highcapable.yukihookapi.hook.xposed.proxy.IYukiHookXposedInit
-import io.github.proify.lyricon.library.meizhuprovider.MeizhuProvider
+import io.github.proify.lyricon.library.meizuprovider.MeizuProvider
 import io.github.proify.lyricon.provider.ProviderLogo
 
 /**
@@ -22,7 +22,7 @@ open class HookEntry : IYukiHookXposedInit {
         YukiHookAPI.encase {
             loadApp(
                 isExcludeSelf = true,
-                MeizhuProvider(
+                MeizuProvider(
                     providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
                     logo = ProviderLogo.fromBase64(Constants.ICON)
                 )
