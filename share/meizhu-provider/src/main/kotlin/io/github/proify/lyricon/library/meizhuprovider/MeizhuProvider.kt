@@ -9,6 +9,7 @@ package io.github.proify.lyricon.library.meizhuprovider
 import android.app.Notification
 import android.app.NotificationManager
 import android.media.session.PlaybackState
+import android.util.Log
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -24,7 +25,7 @@ open class MeizhuProvider(
 
     private companion object {
         private const val FLAG_MEIZU_TICKER = 0x1000000 or 0x2000000
-        //private const val TAG = "MeizhuProvider"
+        private const val TAG = "MeizhuProvider"
     }
 
     private var isPlaying = false
@@ -89,6 +90,7 @@ open class MeizhuProvider(
                         val notify = args[2] as Notification
                         //Log.d(TAG, "notify: $notify")
                         if ((notify.flags and FLAG_MEIZU_TICKER) != 0) {
+                            Log.d(TAG, "ticker: ${notify.tickerText}")
                             val ticker = notify.tickerText?.toString()
                             provider.player.sendText(ticker)
                         }
