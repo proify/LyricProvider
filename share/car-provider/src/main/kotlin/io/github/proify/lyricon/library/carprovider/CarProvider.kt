@@ -28,7 +28,6 @@ open class CarProvider(
     private var lyriconProvider: LyriconProvider? = null
 
     private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
-
     private val pauseRunnable = Runnable { applyPlaybackUpdate(false) }
 
     override fun onHook() {

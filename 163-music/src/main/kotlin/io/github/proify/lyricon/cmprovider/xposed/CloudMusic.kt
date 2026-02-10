@@ -7,7 +7,6 @@ package io.github.proify.lyricon.cmprovider.xposed
 
 import android.app.Application
 import android.media.session.PlaybackState
-import android.os.SystemClock
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.core.YukiMemberHookCreator
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
@@ -22,16 +21,8 @@ import io.github.proify.lyricon.cmprovider.xposed.parser.LocalLyricCache
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
-import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
 import io.github.proify.lyricon.yrckit.download.response.LyricResponse
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.encodeToStream
 import org.luckypray.dexkit.DexKitBridge
@@ -62,15 +53,8 @@ object CloudMusic : YukiBaseHooker() {
         private var currentMusicId: Long? = null
         private var lyricFileObserver: LyricFileObserver? = null
 
-        private val coroutineScope by lazy { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
-        private var progressJob: Job? = null
-
-        private var isPlaying = false
-
         private var dexKitBridge: DexKitBridge? = null
         private var preferencesMonitor: PreferencesMonitor? = null
-
-        private var lastPlaybackState: PlaybackState = PlaybackState.Builder().build()
 
         fun onHook() {
             YLog.debug("Hooking, processName= $processName")
@@ -115,15 +99,7 @@ object CloudMusic : YukiBaseHooker() {
                     }.hook {
                         after {
                             val state = args[0] as? PlaybackState ?: return@after
-                            lastPlaybackState = state
-
-                            when (state.state) {
-                                PlaybackState.STATE_PLAYING -> startSyncAction()
-                                PlaybackState.STATE_PAUSED,
-                                PlaybackState.STATE_STOPPED -> stopSyncAction()
-
-                                else -> Unit
-                            }
+                            provider?.player?.setPlaybackState(state)
                         }
                     }
                 }
@@ -262,46 +238,6 @@ object CloudMusic : YukiBaseHooker() {
             YLog.debug(msg = "setSong Sync: ${song.name} (lyrics: ${song.lyrics?.size ?: 0})")
             lastSong = song
             provider?.player?.setSong(song)
-        }
-
-        // --- 进度同步部分 ---
-
-        private fun startSyncAction() {
-            if (isPlaying) return
-            isPlaying = true
-            provider?.player?.setPlaybackState(true)
-            resumeCoroutineTask()
-        }
-
-        private fun stopSyncAction() {
-            if (!isPlaying) return
-            isPlaying = false
-            provider?.player?.setPlaybackState(false)
-            pauseCoroutineTask()
-        }
-
-        private fun resumeCoroutineTask() {
-            if (progressJob?.isActive == true) return
-            progressJob = coroutineScope.launch {
-                while (isActive && isPlaying) {
-                    val pos = calculateCurrentPosition()
-                    provider?.player?.setPosition(pos)
-                    delay(ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL)
-                }
-            }
-        }
-
-        private fun pauseCoroutineTask() {
-            progressJob?.cancel()
-            progressJob = null
-        }
-
-        private fun calculateCurrentPosition(): Long {
-            val state = lastPlaybackState
-            if (state.state != PlaybackState.STATE_PLAYING) return state.position
-
-            val elapsedSinceUpdate = SystemClock.elapsedRealtime() - state.lastPositionUpdateTime
-            return state.position + (elapsedSinceUpdate * state.playbackSpeed).toLong()
         }
 
         inner class HotHooker {
