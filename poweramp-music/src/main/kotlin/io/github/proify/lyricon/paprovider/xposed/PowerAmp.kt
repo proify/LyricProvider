@@ -12,7 +12,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.session.PlaybackState
 import android.net.Uri
-import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
@@ -26,16 +25,7 @@ import io.github.proify.lyricon.paprovider.bridge.Configs
 import io.github.proify.lyricon.paprovider.xposed.util.SafUriResolver
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
-import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 object PowerAmp : YukiBaseHooker(), DownloadCallback {
     private const val TAG = "PowerAmpProvider"
@@ -44,16 +34,9 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
     // 匹配元数据key
     private val lyricTagRegex by lazy { Regex("(?i)\\b(LYRICS)\\b") }
 
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private var syncJob: Job? = null
     private var provider: LyriconProvider? = null
     private var trackReceiver: BroadcastReceiver? = null
-
-    private var lastPlaybackState: PlaybackState? = null
     private var currentMetadata: TrackMetadata? = null
-    private var isPlaying = false
-
-    // --- Hook 入口 ---
 
     override fun onHook() {
         onAppLifecycle {
@@ -67,11 +50,6 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
         hookMediaSession()
     }
 
-    // --- 初始化与核心配置 ---
-
-    /**
-     * 初始化与宿主 App 的数据通道。
-     */
     private fun initDataChannel() {
         dataChannel.wait(key = BridgeConstants.ACTION_SETTING_CHANGED) {
             YLog.info(tag = TAG, msg = "Settings changed signal received")
@@ -79,9 +57,6 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
         }
     }
 
-    /**
-     * 配置 Lyricon 提供者实例。
-     */
     private fun setupLyriconProvider(context: Context) {
         provider = LyriconFactory.createProvider(
             context = context,
@@ -103,9 +78,6 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
         YLog.debug(tag = TAG, msg = "Settings applied: translationEnabled=$isTranslationEnabled")
     }
 
-    /**
-     * 注册轨道变化广播接收器。
-     */
     private fun setupBroadcastReceiver(context: Context) {
         val filter = IntentFilter(ACTION_TRACK_CHANGED)
         trackReceiver = object : BroadcastReceiver() {
@@ -119,11 +91,6 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
         }
     }
 
-    // --- 播放状态与进度同步 ---
-
-    /*
-     * Hook MediaSession 以获取实时播放状态。
-     */
     private fun hookMediaSession() {
         "android.media.session.MediaSession".toClass()
             .resolve()
@@ -134,62 +101,11 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
                 }.hook {
                     after {
                         val state = args[0] as? PlaybackState ?: return@after
-                        lastPlaybackState = state
-
-                        when (state.state) {
-                            PlaybackState.STATE_PLAYING -> updatePlaybackState(true)
-                            PlaybackState.STATE_PAUSED,
-                            PlaybackState.STATE_STOPPED -> updatePlaybackState(false)
-
-                            else -> Unit
-                        }
+                        provider?.player?.setPlaybackState(state)
                     }
                 }
             }
     }
-
-    /**
-     * 更新播放状态并管理进度同步任务。
-     * @param playing 是否正在播放
-     */
-    private fun updatePlaybackState(playing: Boolean) {
-        if (this.isPlaying == playing) return
-        this.isPlaying = playing
-
-        provider?.player?.setPlaybackState(playing)
-        YLog.debug(tag = TAG, msg = "Playback state changed: isPlaying=$playing")
-
-        if (playing) startSyncTask() else stopSyncTask()
-    }
-
-    private fun startSyncTask() {
-        if (syncJob?.isActive == true) return
-        syncJob = coroutineScope.launch {
-            while (isActive) {
-                val position = calculateCurrentPosition()
-                provider?.player?.setPosition(position)
-                delay(ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL)
-            }
-        }
-    }
-
-    private fun stopSyncTask() {
-        syncJob?.cancel()
-        syncJob = null
-    }
-
-    /**
-     * 基于上次状态快照计算当前实时播放位置。
-     */
-    private fun calculateCurrentPosition(): Long {
-        val state = lastPlaybackState ?: return 0L
-        if (state.state != PlaybackState.STATE_PLAYING) return state.position
-
-        val elapsedSinceUpdate = SystemClock.elapsedRealtime() - state.lastPositionUpdateTime
-        return state.position + (elapsedSinceUpdate * state.playbackSpeed).toLong()
-    }
-
-    // --- 轨道处理与歌词匹配 ---
 
     /**
      * 处理轨道变化逻辑。
@@ -320,8 +236,6 @@ object PowerAmp : YukiBaseHooker(), DownloadCallback {
     }
 
     private fun release() {
-        stopSyncTask()
-        coroutineScope.cancel()
         trackReceiver?.let { appContext?.unregisterReceiver(it) }
         trackReceiver = null
         YLog.info(tag = TAG, msg = "PowerAmp provider released")

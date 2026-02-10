@@ -8,7 +8,6 @@ package io.github.proify.lyricon.spotifyprovider.xposed
 
 import android.media.MediaMetadata
 import android.media.session.PlaybackState
-import android.os.SystemClock
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -16,32 +15,18 @@ import io.github.proify.extensions.toPairMap
 import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
-import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
 import io.github.proify.lyricon.spotifyprovider.xposed.api.NoFoundLyricException
 import io.github.proify.lyricon.spotifyprovider.xposed.api.SpotifyApi
 import io.github.proify.lyricon.spotifyprovider.xposed.api.SpotifyApi.jsonParser
 import io.github.proify.lyricon.spotifyprovider.xposed.api.response.LyricResponse
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import java.util.Locale
 
 object Spotify : YukiBaseHooker(), DownloadCallback {
     private const val TAG = "SpotifyProvider"
     private var lyriconProvider: LyriconProvider? = null
-
-    private var isPlaying = false
     private var trackId: String? = null
     private var lastSong: Song? = null
-
-    private var positionJob: Job? = null
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-    private var lastPlaybackState: PlaybackState? = null
 
     override fun onHook() {
         YLog.debug(tag = TAG, msg = "正在注入进程: $processName")
@@ -51,30 +36,6 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
         }
         hookMediaSession()
         hookOkHttp()
-    }
-
-    private fun startPositionSync() {
-        if (positionJob != null) return
-        positionJob = coroutineScope.launch {
-            while (isActive && isPlaying) {
-                val position = calculateCurrentPosition()
-                lyriconProvider?.player?.setPosition(position)
-                delay(ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL)
-            }
-        }
-    }
-
-    private fun stopPositionSync() {
-        positionJob?.cancel()
-        positionJob = null
-    }
-
-    private fun calculateCurrentPosition(): Long {
-        val state = lastPlaybackState ?: return 0L
-        if (state.state != PlaybackState.STATE_PLAYING) return state.position
-
-        val elapsedSinceUpdate = SystemClock.elapsedRealtime() - state.lastPositionUpdateTime
-        return state.position + (elapsedSinceUpdate * state.playbackSpeed).toLong()
     }
 
     private fun hookOkHttp() {
@@ -112,15 +73,7 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
             }.hook {
                 after {
                     val state = (args[0] as? PlaybackState) ?: return@after
-                    lastPlaybackState = state
-
-                    when (state.state) {
-                        PlaybackState.STATE_PLAYING -> applyPlaybackUpdate(true)
-                        PlaybackState.STATE_PAUSED,
-                        PlaybackState.STATE_STOPPED -> applyPlaybackUpdate(false)
-
-                        else -> Unit
-                    }
+                    lyriconProvider?.player?.setPlaybackState(state)
                 }
             }
 
@@ -170,16 +123,6 @@ object Spotify : YukiBaseHooker(), DownloadCallback {
 
         setPlaceholder(title, artist)
         Downloader.download(id, this)
-    }
-
-    private fun applyPlaybackUpdate(playing: Boolean) {
-        if (this.isPlaying == playing) return
-        this.isPlaying = playing
-        YLog.debug(tag = TAG, msg = "Playback state changed: $playing")
-
-        lyriconProvider?.player?.setPlaybackState(playing)
-
-        if (playing) startPositionSync() else stopPositionSync()
     }
 
     override fun onDownloadFinished(id: String, response: String) {

@@ -13,7 +13,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.MediaMetadata
 import android.media.session.PlaybackState
-import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.highcapable.kavaref.KavaRef.Companion.resolve
@@ -24,16 +23,8 @@ import io.github.proify.lyricon.lyric.model.Song
 import io.github.proify.lyricon.lyric.model.lyricMetadataOf
 import io.github.proify.lyricon.provider.LyriconFactory
 import io.github.proify.lyricon.provider.LyriconProvider
-import io.github.proify.lyricon.provider.ProviderConstants
 import io.github.proify.lyricon.provider.ProviderLogo
 import io.github.proify.qrckit.LyricResponse
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 
 object QQMusic : YukiBaseHooker() {
     private const val TAG = "Lyricon_QQMusic"
@@ -88,18 +79,9 @@ object QQMusic : YukiBaseHooker() {
         }
     }
 
-    /**
-     * 处理播放服务进程逻辑：核心 Hook 与 Lyricon 交互
-     */
     private class PlayerProcessHook : DownloadCallback {
-        private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
-        private var positionUpdateJob: Job? = null
         private var lyriconProvider: LyriconProvider? = null
-
-        private var isMediaPlaying = false
         private var currentMediaId: String? = null
-
-        private var playbackState: PlaybackState? = null
 
         fun hook(loader: ClassLoader) {
             YLog.debug("Hooking Player Process: MediaSession & Lyricon Provider")
@@ -120,15 +102,7 @@ object QQMusic : YukiBaseHooker() {
                     }.hook {
                         after {
                             val state = (args[0] as? PlaybackState)
-                            playbackState = state
-
-                            when (state?.state) {
-                                PlaybackState.STATE_PLAYING -> notifyPlaybackStarted()
-                                PlaybackState.STATE_PAUSED,
-                                PlaybackState.STATE_STOPPED -> notifyPlaybackStopped()
-
-                                else -> Unit
-                            }
+                            lyriconProvider?.player?.setPlaybackState(state)
                         }
                     }
 
@@ -184,34 +158,6 @@ object QQMusic : YukiBaseHooker() {
 
             provider.register()
             this.lyriconProvider = provider
-        }
-
-        private fun notifyPlaybackStarted() {
-            if (isMediaPlaying) return
-            isMediaPlaying = true
-            lyriconProvider?.player?.setPlaybackState(true)
-            launchPositionTracker()
-        }
-
-        private fun notifyPlaybackStopped() {
-            isMediaPlaying = false
-            lyriconProvider?.player?.setPlaybackState(false)
-            stopPositionTracker()
-        }
-
-        private fun launchPositionTracker() {
-            if (positionUpdateJob != null) return
-            positionUpdateJob = coroutineScope.launch {
-                while (isActive && isMediaPlaying) {
-                    lyriconProvider?.player?.setPosition(calculateRealtimePosition())
-                    delay(ProviderConstants.DEFAULT_POSITION_UPDATE_INTERVAL)
-                }
-            }
-        }
-
-        private fun stopPositionTracker() {
-            positionUpdateJob?.cancel()
-            positionUpdateJob = null
         }
 
         // --- 歌曲数据处理 ---
@@ -272,14 +218,6 @@ object QQMusic : YukiBaseHooker() {
 
         fun List<RichLyricLine>.removeInvalidTranslation() = apply {
             forEach { if (it.translation?.trim() == "//") it.translation = null }
-        }
-
-        private fun calculateRealtimePosition(): Long {
-            val state = playbackState ?: return 0L
-            if (state.state != PlaybackState.STATE_PLAYING) return state.position
-
-            val timeDiff = SystemClock.elapsedRealtime() - state.lastPositionUpdateTime
-            return state.position + (timeDiff * state.playbackSpeed).toLong()
         }
     }
 }

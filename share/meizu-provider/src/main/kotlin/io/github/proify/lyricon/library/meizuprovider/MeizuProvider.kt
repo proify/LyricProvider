@@ -28,8 +28,6 @@ open class MeizuProvider(
         private const val TAG = "MeizhuProvider"
     }
 
-    private var isPlaying = false
-
     private val provider: LyriconProvider by lazy {
         LyriconFactory.createProvider(
             appContext!!,
@@ -42,6 +40,7 @@ open class MeizuProvider(
     override fun onHook() {
         YLog.debug("Hooking processName: $processName")
         Flyme.mock(appClassLoader!!)
+
         onAppLifecycle {
             onCreate {
                 hookMedia()
@@ -59,24 +58,11 @@ open class MeizuProvider(
                     parameters(PlaybackState::class.java)
                 }.hook {
                     after {
-                        val state = (args[0] as PlaybackState).state
-                        Log.d(TAG, "state: $state")
-                        when (state) {
-                            PlaybackState.STATE_PLAYING -> updatePlaybackStatus(true)
-                            PlaybackState.STATE_PAUSED,
-                            PlaybackState.STATE_STOPPED -> updatePlaybackStatus(false)
-
-                            else -> Unit
-                        }
+                        val state = (args[0] as PlaybackState)
+                        provider.player.setPlaybackState(state)
                     }
                 }
             }
-    }
-
-    private fun updatePlaybackStatus(state: Boolean) {
-        if (isPlaying == state) return
-        isPlaying = state
-        provider.player.setPlaybackState(state)
     }
 
     private fun hookNotify() {

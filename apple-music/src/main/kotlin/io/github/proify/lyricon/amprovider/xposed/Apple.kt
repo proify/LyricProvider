@@ -1,5 +1,12 @@
+/*
+ * Copyright 2026 Proify, Tomakino
+ * Licensed under the Apache License, Version 2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
+ */
+
 package io.github.proify.lyricon.amprovider.xposed
 
+import android.app.Application
 import android.media.MediaMetadata
 import android.media.session.PlaybackState
 import com.highcapable.kavaref.KavaRef.Companion.resolve
@@ -10,6 +17,9 @@ import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderLogo
 
 object Apple : YukiBaseHooker() {
+
+    private lateinit var application: Application
+    private lateinit var classLoader: ClassLoader
     private var provider: LyriconProvider? = null
 
     override fun onHook() {
@@ -19,7 +29,10 @@ object Apple : YukiBaseHooker() {
     }
 
     private fun setupModule() {
-        DiskSongManager.initialize(appContext!!)
+        application = appContext ?: return
+        classLoader = appClassLoader ?: return
+
+        DiskSongManager.initialize(application)
         initPreferences()
         setupLyriconProvider()
         registerMediaHooks()
@@ -28,7 +41,7 @@ object Apple : YukiBaseHooker() {
 
     private fun initPreferences() {
         PreferencesMonitor.apply {
-            initialize(appContext!!)
+            initialize(application)
             listener = object : PreferencesMonitor.Listener {
                 override fun onTranslationSelectedChanged(selected: Boolean) {
                     provider?.player?.setDisplayTranslation(selected)
@@ -38,9 +51,6 @@ object Apple : YukiBaseHooker() {
     }
 
     private fun setupLyriconProvider() {
-        val application = appContext ?: return
-        val classLoader = appClassLoader ?: return
-
         provider = LyriconFactory.createProvider(
             context = application,
             providerPackageName = Constants.PROVIDER_PACKAGE_NAME,
@@ -59,15 +69,18 @@ object Apple : YukiBaseHooker() {
 
     private fun registerMediaHooks() {
         "android.media.session.MediaSession".toClass().resolve().apply {
+            // 监听播放状态
             firstMethod {
                 name = "setPlaybackState"
                 parameters(PlaybackState::class.java)
             }.hook {
                 after {
-                    provider?.player?.setPlaybackState(args[0] as? PlaybackState)
+                    val state = args[0] as? PlaybackState
+                    provider?.player?.setPlaybackState(state)
                 }
             }
 
+            // 监听切歌元数据
             firstMethod {
                 name = "setMetadata"
                 parameters("android.media.MediaMetadata")
@@ -82,7 +95,7 @@ object Apple : YukiBaseHooker() {
     }
 
     private fun registerLyricHooks() {
-        appClassLoader!!.loadClass("com.apple.android.music.player.viewmodel.PlayerLyricsViewModel")
+        classLoader.loadClass("com.apple.android.music.player.viewmodel.PlayerLyricsViewModel")
             .resolve()
             .firstMethod { name = "buildTimeRangeToLyricsMap" }
             .hook {

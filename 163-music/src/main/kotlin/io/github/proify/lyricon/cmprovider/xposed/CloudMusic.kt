@@ -98,7 +98,7 @@ object CloudMusic : YukiBaseHooker() {
                         parameters(PlaybackState::class.java)
                     }.hook {
                         after {
-                            val state = args[0] as? PlaybackState ?: return@after
+                            val state = args[0] as? PlaybackState
                             provider?.player?.setPlaybackState(state)
                         }
                     }

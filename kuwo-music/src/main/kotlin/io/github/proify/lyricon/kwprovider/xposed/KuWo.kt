@@ -8,8 +8,6 @@ package io.github.proify.lyricon.kwprovider.xposed
 
 import android.media.MediaMetadata
 import android.media.session.PlaybackState
-import android.os.Handler
-import android.os.Looper
 import com.highcapable.kavaref.KavaRef.Companion.resolve
 import com.highcapable.yukihookapi.hook.entity.YukiBaseHooker
 import com.highcapable.yukihookapi.hook.log.YLog
@@ -19,13 +17,7 @@ import io.github.proify.lyricon.provider.LyriconProvider
 import io.github.proify.lyricon.provider.ProviderLogo
 
 open class KuWo(val tag: String = "KuWoProvider") : YukiBaseHooker() {
-
-    private var currentPlayingState = false
     private var lyriconProvider: LyriconProvider? = null
-
-    private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
-
-    private val pauseRunnable = Runnable { applyPlaybackUpdate(false) }
 
     override fun onHook() {
         AndroidUtils.openBluetoothA2dpOn(appClassLoader)
@@ -36,7 +28,6 @@ open class KuWo(val tag: String = "KuWoProvider") : YukiBaseHooker() {
                 initProvider()
             }
         }
-
         hookMediaSession()
     }
 
@@ -57,8 +48,8 @@ open class KuWo(val tag: String = "KuWoProvider") : YukiBaseHooker() {
                 parameters(PlaybackState::class.java)
             }.hook {
                 after {
-                    val state = (args[0] as? PlaybackState)?.state ?: return@after
-                    dispatchPlaybackState(state)
+                    val state = args[0] as? PlaybackState
+                    lyriconProvider?.player?.setPlaybackState(state)
                 }
             }
 
@@ -77,25 +68,5 @@ open class KuWo(val tag: String = "KuWoProvider") : YukiBaseHooker() {
                 }
             }
         }
-    }
-
-    private fun dispatchPlaybackState(state: Int) {
-        mainHandler.removeCallbacks(pauseRunnable)
-
-        when (state) {
-            PlaybackState.STATE_PLAYING -> applyPlaybackUpdate(true)
-            PlaybackState.STATE_PAUSED, PlaybackState.STATE_STOPPED -> mainHandler.postDelayed(
-                pauseRunnable,
-                0
-            )
-        }
-    }
-
-    private fun applyPlaybackUpdate(playing: Boolean) {
-        if (this.currentPlayingState == playing) return
-        this.currentPlayingState = playing
-
-        YLog.debug(tag = tag, msg = "Playback state changed: $playing")
-        lyriconProvider?.player?.setPlaybackState(playing)
     }
 }
