@@ -14,7 +14,11 @@ object SongRepository {
 
     /**
      * 根据 ID 获取歌曲
-     * 策略：内存/磁盘缓存 -> 占位符
+     * 策略：磁盘缓存 -> 占位符
+     *
+     * 注意：id 可能是 MediaSession 的 mediaId，也可能是原生 Song 的 adamId。
+     * 两者在某些场景下不一致，因此通过 MediaMetadataCache 查找
+     * 歌名/歌手时需要同时兼容两种 ID。
      */
     fun getSong(id: String): Song {
         // 1. 尝试从磁盘缓存读取
@@ -24,7 +28,8 @@ object SongRepository {
         }
 
         // 2. 缓存未命中，从 Metadata 生成占位符（只有标题/歌手，无歌词）
-        val metadata = MediaMetadataCache.getMetadataById(id)
+        //    兼容 mediaId 与 adamId 两种 key（通过 getMetadataByIdOrAdamId 反查）
+        val metadata = MediaMetadataCache.getMetadataByIdOrAdamId(id)
         return Song(id, metadata?.title, metadata?.artist)
     }
 

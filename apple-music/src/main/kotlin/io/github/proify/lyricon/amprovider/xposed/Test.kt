@@ -1,69 +1,116 @@
-/*
- * Copyright 2026 Proify, Tomakino
- * Licensed under the Apache License, Version 2.0
- * http://www.apache.org/licenses/LICENSE-2.0
- */
-
 package io.github.proify.lyricon.amprovider.xposed
 
-//@file:Suppress("unused")
-//
-//package io.github.proify.lyricon.amprovider
-//
-//import android.util.Log
-//import de.robv.android.xposed.XC_MethodHook
-//import de.robv.android.xposed.XposedHelpers
-//import io.github.proify.lyricon.amprovider.parser.AppleSongParser
-//
-//object Test {
-//    private const val TAG = "LyricDownloader"
-//    private lateinit var classLoader: ClassLoader
-//
-//    fun initialize(classLoader: ClassLoader) {
-//        this.classLoader = classLoader
-//
-////        val clazz = $$"com.apple.android.music.ttml.javanative.TTMLParser$TTMLParserNative".toClass(
-////            Test.classLoader
-////        )
-////        val instance = XposedHelpers.newInstance(clazz)
-////
-////        val songInfoPtr = XposedHelpers.callMethod(
-////            instance,
-////            "songInfoFromTTML",
-////            a
-////
-////        )
-////        Log.d(TAG, "songInfoPtr: $songInfoPtr")
-////        printSongInfoPtr(songInfoPtr)
-//
-//        XposedHelpers.findAndHookMethod(
-//            $$"com.apple.android.music.ttml.javanative.TTMLParser$TTMLParserNative",
-//            classLoader,
-//            "songInfoFromTTML",
-//            String::class.java,
-//            object : XC_MethodHook() {
-//
-//                @Throws(Throwable::class)
-//                override fun afterHookedMethod(param: MethodHookParam?) {
-//                    super.afterHookedMethod(param)
-//                    val songInfoPtr = param?.result
-//                    Log.d(TAG, "songInfoPtr arg: ${param?.args[0]}")
-//                    Log.d(TAG, "songInfoPtr result: $songInfoPtr")
-//                    songInfoPtr?.let { printSongInfoPtr(it) }
-//                }
-//            })
-//
-//    }
-//
-//    fun printSongInfoPtr(songInfoPtr: Any) {
-//        val songNative: Any? = XposedHelpers.callMethod(songInfoPtr, "get")
-//        Log.d(TAG, "songNative: $songNative")
-//
-//        val song = songNative?.let { AppleSongParser.parser(it) }
-//        Log.d(TAG, "song: $song")
-//
-//    }
-//
-////    const val a =
-////        "<tt xmlns=\\\"http://www.w3.org/ns/ttml\\\" xmlns:itunes=\\\"http://music.apple.com/lyric-ttml-internal\\\" xmlns:ttm=\\\"http://www.w3.org/ns/ttml#metadata\\\" itunes:timing=\\\"Word\\\" xml:lang=\\\"ko\\\"><head><metadata><ttm:agent type=\\\"person\\\" xml:id=\\\"v1\\\"/><iTunesMetadata xmlns=\\\"http://music.apple.com/lyric-ttml-internal\\\"><translations><translation type=\\\"subtitle\\\" xml:lang=\\\"zh-Hans\\\"><text for=\\\"L21\\\">终将铸就辉煌 金光四射</text><text for=\\\"L20\\\">你看 我们并肩而立 熠熠生辉</text><text for=\\\"L23\\\">放声高歌</text><text for=\\\"L22\\\">我们向着云霄翱翔</text><text for=\\\"L25\\\">终将铸就辉煌 金光四射</text><text for=\\\"L24\\\">这份光芒 永世不灭</text><text for=\\\"L27\\\">我们的时代 无畏无惧 坦诚无欺 这才是我们本该有的模样</text><text for=\\\"L26\\\">我不再躲藏 此刻我正光芒万丈 仿佛生来就该如此夺目</text><text for=\\\"L29\\\">只为觉醒之后 重获真正的自我</text><text for=\\\"L28\\\">长久以来 我一心冲破重重壁垒</text><text for=\\\"L30\\\">如今将这些过往的桎梏 尽数抛却身后</text><text for=\\\"L32\\\">不再躲藏 我将光芒万丈 仿佛生来就该如此</text><text for=\\\"L31\\\">终于活成众人眼中期待的模样</text><text for=\\\"L34\\\">我们正扶摇直上 步步高升</text><text for=\\\"L33\\\">因为我们是无畏的猎手 声音铿锵有力 这份信念 我无比坚定</text><text for=\\\"L36\\\">你看 我们并肩而立 熠熠生辉</text><text for=\\\"L35\\\">这是属于我们的时刻</text><text for=\\\"L38\\\">我们向着云霄翱翔</text><text for=\\\"L37\\\">终将铸就辉煌 金光四射</text><text for=\\\"L39\\\">放声高歌</text><text for=\\\"L41\\\">终将铸就辉煌 金光四射</text><text for=\\\"L40\\\">这份光芒 永世不灭</text><text for=\\\"L43\\\">我们的时代 无畏无惧 坦诚无欺 这才是我们本该有的模样</text><text for=\\\"L42\\\">我不再躲藏 此刻我正光芒万丈 仿佛生来就该如此夺目</text><text for=\\\"L45\\\">我们终将铸就辉煌 金光四射</text><text for=\\\"L44\\\">你要知晓</text><text for=\\\"L47\\\">生而璀璨 生而耀眼</text><text for=\\\"L46\\\">我们定能绽放光彩 熠熠生辉</text><text for=\\\"L49\\\">你要知晓 这是属于我们的时代 无畏无惧 坦荡真诚 这才是我们本该有的模样</text><text for=\\\"L48\\\">我们本就该光芒万丈</text><text for=\\\"L1\\\">我曾如孤魂</text><text for=\\\"L2\\\">孑然一身 哈</text><text for=\\\"L3\\\">前路昏暗 哈</text><text for=\\\"L4\\\">漫漫无际</text><text for=\\\"L5\\\">被赋予王座</text><text for=\\\"L6\\\">我却茫然无措</text><text for=\\\"L10\\\">试图做到尽善尽美</text><text for=\\\"L7\\\">不敢置信</text><text for=\\\"L8\\\">如今才知道 我生来就是女王</text><text for=\\\"L12\\\">被斥为叛逆少女</text><text for=\\\"L9\\\">我曾过着双重生活</text><text for=\\\"L11\\\">却始终找不到自己的栖身之地</text><text for=\\\"L14\\\">但如今这正是我的生存之道</text><text for=\\\"L13\\\">只因我太过桀骜不驯</text><text for=\\\"L16\\\">我不再躲藏 此刻我正光芒万丈 仿佛生来就该如此夺目</text><text for=\\\"L15\\\">永不停歇 闪耀舞台</text><text for=\\\"L18\\\">我们正扶摇直上 步步高升</text><text for=\\\"L17\\\">我们奋力追梦 跋涉至此 现在我相信</text><text for=\\\"L19\\\">这是属于我们的时刻</text></translation></translations><songwriters><songwriter>EJAE</songwriter><songwriter>Hee Dong Nam</songwriter><songwriter>Jeong Hoon Seo</songwriter><songwriter>Joong Gyu Kwak</songwriter><songwriter>Mark Sonnenblick</songwriter><songwriter>PARK HONG JUN</songwriter><songwriter>Yoo Han Lee</songwriter><songwriter>Yu Han Lee</songwriter></songwriters></iTunesMetadata></metadata></head><body dur=\\\"3:14.608\\\"><div begin=\\\"16.058\\\" end=\\\"30.893\\\" itunes:songPart=\\\"Verse\\\"><p begin=\\\"16.058\\\" end=\\\"17.123\\\" itunes:key=\\\"L1\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"16.058\\\" end=\\\"16.297\\\">I</span> <span begin=\\\"16.297\\\" end=\\\"16.517\\\">was</span> <span begin=\\\"16.517\\\" end=\\\"16.714\\\">a</span> <span begin=\\\"16.714\\\" end=\\\"17.123\\\">ghost</span></p><p begin=\\\"17.123\\\" end=\\\"18.850\\\" itunes:key=\\\"L2\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"17.123\\\" end=\\\"17.323\\\">I</span> <span begin=\\\"17.323\\\" end=\\\"17.503\\\">was</span> <span begin=\\\"17.503\\\" end=\\\"18.226\\\">alone,</span> <span begin=\\\"18.449\\\" end=\\\"18.850\\\">ha</span></p><p begin=\\\"19.003\\\" end=\\\"20.878\\\" itunes:key=\\\"L3\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"19.003\\\" end=\\\"19.314\\\">어</span><span begin=\\\"19.314\\\" end=\\\"19.434\\\">두</span><span begin=\\\"19.434\\\" end=\\\"19.624\\\">워</span><span begin=\\\"19.624\\\" end=\\\"20.121\\\">진</span> <span begin=\\\"20.427\\\" end=\\\"20.878\\\">Ha</span></p><p begin=\\\"21.075\\\" end=\\\"23.903\\\" itunes:key=\\\"L4\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"21.075\\\" end=\\\"21.384\\\">앞길</span> <span begin=\\\"21.384\\\" end=\\\"21.609\\\">속</span><span begin=\\\"21.609\\\" end=\\\"22.197\\\">에</span> <span ttm:role=\\\"x-bg\\\"><span begin=\\\"22.437\\\" end=\\\"23.903\\\">(Ah)</span></span></p><p begin=\\\"23.903\\\" end=\\\"24.885\\\" itunes:key=\\\"L5\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"23.903\\\" end=\\\"24.271\\\">Given</span> <span begin=\\\"24.271\\\" end=\\\"24.545\\\">the</span> <span begin=\\\"24.545\\\" end=\\\"24.885\\\">throne</span></p><p begin=\\\"24.885\\\" end=\\\"25.983\\\" itunes:key=\\\"L6\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"24.885\\\" end=\\\"25.205\\\">I</span> <span begin=\\\"25.205\\\" end=\\\"25.487\\\">didn't</span> <span begin=\\\"25.487\\\" end=\\\"25.983\\\">know</span></p><p begin=\\\"26.153\\\" end=\\\"27.827\\\" itunes:key=\\\"L7\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"26.153\\\" end=\\\"26.646\\\">How</span> <span begin=\\\"27.118\\\" end=\\\"27.262\\\">to</span> <span begin=\\\"27.262\\\" end=\\\"27.827\\\">believe</span></p><p begin=\\\"28.034\\\" end=\\\"30.893\\\" itunes:key=\\\"L8\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"28.034\\\" end=\\\"29.056\\\">I</span> <span begin=\\\"29.056\\\" end=\\\"29.396\\\">was the</span> <span begin=\\\"29.396\\\" end=\\\"29.777\\\">queen</span> <span begin=\\\"29.777\\\" end=\\\"29.907\\\">that</span> <span begin=\\\"29.907\\\" end=\\\"30.164\\\">I'm</span> <span begin=\\\"30.164\\\" end=\\\"30.435\\\">meant</span> <span begin=\\\"30.435\\\" end=\\\"30.688\\\">to</span> <span begin=\\\"30.688\\\" end=\\\"30.893\\\">be</span></p></div><div begin=\\\"30.793\\\" end=\\\"46.821\\\" itunes:songPart=\\\"Verse\\\"><p begin=\\\"30.793\\\" end=\\\"32.527\\\" itunes:key=\\\"L9\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"30.793\\\" end=\\\"31.140\\\">I</span> <span begin=\\\"31.140\\\" end=\\\"31.563\\\">lived</span> <span begin=\\\"31.627\\\" end=\\\"32.030\\\">two</span> <span begin=\\\"32.130\\\" end=\\\"32.527\\\">lives</span></p><p begin=\\\"32.527\\\" end=\\\"34.656\\\" itunes:key=\\\"L10\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"32.527\\\" end=\\\"32.836\\\">Tried</span> <span begin=\\\"32.836\\\" end=\\\"33.138\\\">to</span> <span begin=\\\"33.138\\\" end=\\\"33.528\\\">play</span> <span begin=\\\"33.639\\\" end=\\\"34.140\\\">both</span> <span begin=\\\"34.140\\\" end=\\\"34.656\\\">sides</span></p><p begin=\\\"34.656\\\" end=\\\"38.148\\\" itunes:key=\\\"L11\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"34.656\\\" end=\\\"35.134\\\">But</span> <span begin=\\\"35.252\\\" end=\\\"35.587\\\">I</span> <span begin=\\\"35.587\\\" end=\\\"36.210\\\">couldn't</span> <span begin=\\\"36.210\\\" end=\\\"36.536\\\">find</span> <span begin=\\\"36.536\\\" end=\\\"36.839\\\">my</span> <span begin=\\\"36.839\\\" end=\\\"37.225\\\">own</span> <span begin=\\\"37.225\\\" end=\\\"37.876\\\">pla</span><span begin=\\\"37.876\\\" end=\\\"38.148\\\">ce</span></p><p begin=\\\"38.341\\\" end=\\\"40.329\\\" itunes:key=\\\"L12\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"38.341\\\" end=\\\"38.678\\\">Called</span> <span begin=\\\"38.678\\\" end=\\\"38.973\\\">a</span> <span begin=\\\"38.973\\\" end=\\\"39.459\\\">pro</span><span begin=\\\"39.459\\\" end=\\\"39.901\\\">blem</span> <span begin=\\\"39.901\\\" end=\\\"40.329\\\">child</span></p><p begin=\\\"40.349\\\" end=\\\"42.513\\\" itunes:key=\\\"L13\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"40.349\\\" end=\\\"40.632\\\">'Cause</span> <span begin=\\\"40.632\\\" end=\\\"40.896\\\">I</span> <span begin=\\\"40.896\\\" end=\\\"41.228\\\">got</span> <span begin=\\\"41.418\\\" end=\\\"41.720\\\">too</span> <span begin=\\\"41.903\\\" end=\\\"42.513\\\">wild</span></p><p begin=\\\"42.513\\\" end=\\\"45.588\\\" itunes:key=\\\"L14\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"42.513\\\" end=\\\"42.862\\\">But</span> <span begin=\\\"43.068\\\" end=\\\"43.413\\\">now</span> <span begin=\\\"43.413\\\" end=\\\"43.750\\\">that's</span> <span begin=\\\"43.750\\\" end=\\\"44.068\\\">how</span> <span begin=\\\"44.068\\\" end=\\\"44.381\\\">I'm</span> <span begin=\\\"44.381\\\" end=\\\"45.001\\\">getting</span> <span begin=\\\"45.001\\\" end=\\\"45.588\\\">paid</span></p><p begin=\\\"45.588\\\" end=\\\"46.821\\\" itunes:key=\\\"L15\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"45.588\\\" end=\\\"45.957\\\">끝없</span><span begin=\\\"45.957\\\" end=\\\"46.151\\\">이</span> <span begin=\\\"46.151\\\" end=\\\"46.352\\\">On</span> <span begin=\\\"46.352\\\" end=\\\"46.821\\\">stage</span></p></div><div begin=\\\"46.821\\\" end=\\\"1:01.614\\\" itunes:songPart=\\\"PreChorus\\\"><p begin=\\\"46.821\\\" end=\\\"53.868\\\" itunes:key=\\\"L16\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"46.821\\\" end=\\\"47.393\\\">I'm</span> <span begin=\\\"47.393\\\" end=\\\"47.859\\\">done</span> <span begin=\\\"47.859\\\" end=\\\"48.894\\\">hiding,</span> <span begin=\\\"48.894\\\" end=\\\"49.370\\\">now</span> <span begin=\\\"49.370\\\" end=\\\"49.780\\\">I'm</span> <span begin=\\\"49.780\\\" end=\\\"50.781\\\">shining</span> <span begin=\\\"50.781\\\" end=\\\"51.345\\\">like</span> <span begin=\\\"51.345\\\" end=\\\"51.820\\\">I'm</span> <span begin=\\\"51.820\\\" end=\\\"52.336\\\">born</span> <span begin=\\\"52.336\\\" end=\\\"52.600\\\">to</span> <span begin=\\\"52.600\\\" end=\\\"53.868\\\">be</span></p><p begin=\\\"54.128\\\" end=\\\"1:01.614\\\" itunes:key=\\\"L17\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"54.128\\\" end=\\\"54.690\\\">We</span> <span begin=\\\"54.690\\\" end=\\\"55.643\\\">dreamin'</span> <span begin=\\\"55.643\\\" end=\\\"56.184\\\">hard,</span> <span begin=\\\"56.184\\\" end=\\\"56.694\\\">we</span> <span begin=\\\"56.694\\\" end=\\\"57.101\\\">came</span> <span begin=\\\"57.101\\\" end=\\\"57.540\\\">so</span> <span begin=\\\"57.540\\\" end=\\\"58.142\\\">far,</span> <span begin=\\\"58.142\\\" end=\\\"58.632\\\">now</span> <span begin=\\\"58.632\\\" end=\\\"59.153\\\">I</span> <span begin=\\\"59.153\\\" end=\\\"59.547\\\">be</span><span begin=\\\"59.547\\\" end=\\\"1:01.614\\\">lieve</span></p></div><div begin=\\\"1:01.514\\\" end=\\\"1:16.862\\\" itunes:songPart=\\\"Chorus\\\"><p begin=\\\"1:01.514\\\" end=\\\"1:03.789\\\" itunes:key=\\\"L18\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:01.514\\\" end=\\\"1:01.965\\\">We're</span> <span begin=\\\"1:01.965\\\" end=\\\"1:02.584\\\">goin'</span> <span begin=\\\"1:02.584\\\" end=\\\"1:03.082\\\">up,</span> <span begin=\\\"1:03.082\\\" end=\\\"1:03.536\\\">up,</span> <span begin=\\\"1:03.536\\\" end=\\\"1:03.789\\\">up</span></p><p begin=\\\"1:03.789\\\" end=\\\"1:05.281\\\" itunes:key=\\\"L19\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:03.789\\\" end=\\\"1:04.063\\\">It's</span> <span begin=\\\"1:04.063\\\" end=\\\"1:04.508\\\">our</span> <span begin=\\\"1:04.508\\\" end=\\\"1:05.027\\\">mo</span><span begin=\\\"1:05.027\\\" end=\\\"1:05.281\\\">ment</span></p><p begin=\\\"1:05.401\\\" end=\\\"1:07.073\\\" itunes:key=\\\"L20\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:05.401\\\" end=\\\"1:05.624\\\">You</span> <span begin=\\\"1:05.624\\\" end=\\\"1:05.783\\\">know</span> <span begin=\\\"1:05.783\\\" end=\\\"1:06.285\\\">together</span> <span begin=\\\"1:06.285\\\" end=\\\"1:06.471\\\">we're</span> <span begin=\\\"1:06.471\\\" end=\\\"1:07.073\\\">glowing</span></p><p begin=\\\"1:07.365\\\" end=\\\"1:09.012\\\" itunes:key=\\\"L21\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:07.365\\\" end=\\\"1:07.756\\\">Gonna</span> <span begin=\\\"1:07.756\\\" end=\\\"1:07.953\\\">be,</span> <span begin=\\\"1:07.953\\\" end=\\\"1:08.251\\\">gonna</span> <span begin=\\\"1:08.251\\\" end=\\\"1:08.436\\\">be</span> <span begin=\\\"1:08.436\\\" end=\\\"1:09.012\\\">golden</span></p><p begin=\\\"1:09.280\\\" end=\\\"1:11.627\\\" itunes:key=\\\"L22\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:09.280\\\" end=\\\"1:10.361\\\">Oh,</span> <span begin=\\\"1:10.361\\\" end=\\\"1:10.881\\\">up,</span> <span begin=\\\"1:10.881\\\" end=\\\"1:11.363\\\">up,</span> <span begin=\\\"1:11.363\\\" end=\\\"1:11.627\\\">up</span></p><p begin=\\\"1:11.627\\\" end=\\\"1:13.257\\\" itunes:key=\\\"L23\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:11.627\\\" end=\\\"1:11.888\\\">With</span> <span begin=\\\"1:11.888\\\" end=\\\"1:12.342\\\">our</span> <span begin=\\\"1:12.342\\\" end=\\\"1:13.257\\\">voices</span></p><p begin=\\\"1:13.257\\\" end=\\\"1:14.935\\\" itunes:key=\\\"L24\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:13.257\\\" end=\\\"1:13.801\\\">영원히</span> <span begin=\\\"1:13.801\\\" end=\\\"1:14.079\\\">깨질</span> <span begin=\\\"1:14.079\\\" end=\\\"1:14.237\\\">수</span> <span begin=\\\"1:14.237\\\" end=\\\"1:14.603\\\">없</span><span begin=\\\"1:14.603\\\" end=\\\"1:14.935\\\">는</span></p><p begin=\\\"1:15.161\\\" end=\\\"1:16.862\\\" itunes:key=\\\"L25\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:15.161\\\" end=\\\"1:15.760\\\">Gonna be,</span> <span begin=\\\"1:15.760\\\" end=\\\"1:16.234\\\">gonna be</span> <span begin=\\\"1:16.234\\\" end=\\\"1:16.862\\\">golden</span></p></div><div begin=\\\"1:17.121\\\" end=\\\"1:33.129\\\" itunes:songPart=\\\"Chorus\\\"><p begin=\\\"1:17.121\\\" end=\\\"1:24.798\\\" itunes:key=\\\"L26\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:17.121\\\" end=\\\"1:18.103\\\">Oh,</span> <span begin=\\\"1:18.103\\\" end=\\\"1:18.647\\\">I'm</span> <span begin=\\\"1:18.647\\\" end=\\\"1:19.061\\\">done</span> <span begin=\\\"1:19.061\\\" end=\\\"1:19.631\\\">hi</span><span begin=\\\"1:19.631\\\" end=\\\"1:20.086\\\">ding,</span> <span begin=\\\"1:20.086\\\" end=\\\"1:20.569\\\">now</span> <span begin=\\\"1:20.569\\\" end=\\\"1:20.982\\\">I'm</span> <span begin=\\\"1:20.982\\\" end=\\\"1:22.019\\\">shining</span> <span begin=\\\"1:22.019\\\" end=\\\"1:22.546\\\">like</span> <span begin=\\\"1:22.546\\\" end=\\\"1:23.013\\\">I'm</span> <span begin=\\\"1:23.013\\\" end=\\\"1:23.505\\\">born</span> <span begin=\\\"1:23.505\\\" end=\\\"1:23.813\\\">to</span> <span begin=\\\"1:23.813\\\" end=\\\"1:24.798\\\">be</span></p><p begin=\\\"1:25.359\\\" end=\\\"1:33.129\\\" itunes:key=\\\"L27\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:25.359\\\" end=\\\"1:25.906\\\">Oh,</span> <span begin=\\\"1:25.906\\\" end=\\\"1:26.906\\\">our</span> <span begin=\\\"1:26.906\\\" end=\\\"1:27.404\\\">time,</span> <span begin=\\\"1:27.404\\\" end=\\\"1:27.874\\\">no</span> <span begin=\\\"1:27.874\\\" end=\\\"1:28.407\\\">fears,</span> <span begin=\\\"1:28.407\\\" end=\\\"1:28.868\\\">no</span> <span begin=\\\"1:28.868\\\" end=\\\"1:29.369\\\">lies,</span> <span begin=\\\"1:29.369\\\" end=\\\"1:29.874\\\">that's</span> <span begin=\\\"1:29.874\\\" end=\\\"1:30.328\\\">who</span> <span begin=\\\"1:30.328\\\" end=\\\"1:30.848\\\">we're</span> <span begin=\\\"1:30.848\\\" end=\\\"1:31.319\\\">born</span> <span begin=\\\"1:31.319\\\" end=\\\"1:31.661\\\">to</span> <span begin=\\\"1:31.661\\\" end=\\\"1:33.129\\\">be</span></p></div><div begin=\\\"1:35.056\\\" end=\\\"1:50.603\\\" itunes:songPart=\\\"Bridge\\\"><p begin=\\\"1:35.056\\\" end=\\\"1:38.956\\\" itunes:key=\\\"L28\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:35.056\\\" end=\\\"1:35.682\\\">Waited</span> <span begin=\\\"1:35.682\\\" end=\\\"1:36.293\\\">so</span> <span begin=\\\"1:36.293\\\" end=\\\"1:36.775\\\">long</span> <span begin=\\\"1:36.775\\\" end=\\\"1:37.021\\\">to</span> <span begin=\\\"1:37.021\\\" end=\\\"1:37.482\\\">break</span> <span begin=\\\"1:37.482\\\" end=\\\"1:37.808\\\">these</span> <span begin=\\\"1:37.808\\\" end=\\\"1:38.602\\\">walls</span> <span begin=\\\"1:38.602\\\" end=\\\"1:38.956\\\">down</span></p><p begin=\\\"1:39.160\\\" end=\\\"1:42.429\\\" itunes:key=\\\"L29\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:39.160\\\" end=\\\"1:39.396\\\">To</span> <span begin=\\\"1:39.396\\\" end=\\\"1:39.918\\\">wake</span> <span begin=\\\"1:39.918\\\" end=\\\"1:40.274\\\">up</span> <span begin=\\\"1:40.704\\\" end=\\\"1:40.879\\\">and</span> <span begin=\\\"1:40.879\\\" end=\\\"1:41.303\\\">feel</span> <span begin=\\\"1:41.303\\\" end=\\\"1:41.922\\\">like</span> <span begin=\\\"1:41.922\\\" end=\\\"1:42.429\\\">me</span></p><p begin=\\\"1:43.166\\\" end=\\\"1:46.699\\\" itunes:key=\\\"L30\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:43.166\\\" end=\\\"1:43.504\\\">Put</span> <span begin=\\\"1:43.504\\\" end=\\\"1:43.837\\\">these</span> <span begin=\\\"1:43.837\\\" end=\\\"1:44.954\\\">patterns</span> <span begin=\\\"1:44.954\\\" end=\\\"1:45.248\\\">all</span> <span begin=\\\"1:45.248\\\" end=\\\"1:45.690\\\">in the</span> <span begin=\\\"1:45.690\\\" end=\\\"1:46.422\\\">past</span> <span begin=\\\"1:46.422\\\" end=\\\"1:46.699\\\">now</span></p><p begin=\\\"1:47.001\\\" end=\\\"1:50.603\\\" itunes:key=\\\"L31\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:47.001\\\" end=\\\"1:47.272\\\">And</span> <span begin=\\\"1:47.272\\\" end=\\\"1:47.861\\\">finally</span> <span begin=\\\"1:47.861\\\" end=\\\"1:48.419\\\">live</span> <span begin=\\\"1:48.612\\\" end=\\\"1:48.800\\\">like</span> <span begin=\\\"1:48.800\\\" end=\\\"1:48.955\\\">the</span> <span begin=\\\"1:48.955\\\" end=\\\"1:49.362\\\">girl</span> <span begin=\\\"1:49.362\\\" end=\\\"1:49.612\\\">they</span> <span begin=\\\"1:49.612\\\" end=\\\"1:49.872\\\">all</span> <span begin=\\\"1:49.872\\\" end=\\\"1:50.603\\\">see</span></p></div><div begin=\\\"1:51.626\\\" end=\\\"2:06.951\\\" itunes:songPart=\\\"PreChorus\\\"><p begin=\\\"1:51.626\\\" end=\\\"1:58.331\\\" itunes:key=\\\"L32\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:51.626\\\" end=\\\"1:52.343\\\">No</span> <span begin=\\\"1:52.343\\\" end=\\\"1:52.834\\\">more</span> <span begin=\\\"1:52.834\\\" end=\\\"1:53.386\\\">hi</span><span begin=\\\"1:53.386\\\" end=\\\"1:53.888\\\">ding,</span> <span begin=\\\"1:53.888\\\" end=\\\"1:54.330\\\">I'll</span> <span begin=\\\"1:54.330\\\" end=\\\"1:54.679\\\">be</span> <span begin=\\\"1:54.679\\\" end=\\\"1:55.806\\\">shining</span> <span begin=\\\"1:55.806\\\" end=\\\"1:56.356\\\">like</span> <span begin=\\\"1:56.356\\\" end=\\\"1:56.823\\\">I'm</span> <span begin=\\\"1:56.823\\\" end=\\\"1:57.339\\\">born</span> <span begin=\\\"1:57.339\\\" end=\\\"1:57.606\\\">to</span> <span begin=\\\"1:57.606\\\" end=\\\"1:58.331\\\">be</span></p><p begin=\\\"1:59.209\\\" end=\\\"2:06.951\\\" itunes:key=\\\"L33\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"1:59.209\\\" end=\\\"1:59.856\\\">'Cause</span> <span begin=\\\"1:59.856\\\" end=\\\"2:00.319\\\">we</span> <span begin=\\\"2:00.319\\\" end=\\\"2:00.770\\\">are</span> <span begin=\\\"2:00.770\\\" end=\\\"2:01.904\\\">hunters,</span> <span begin=\\\"2:01.904\\\" end=\\\"2:02.736\\\">voices</span> <span begin=\\\"2:02.736\\\" end=\\\"2:03.330\\\">strong,</span> <span begin=\\\"2:03.330\\\" end=\\\"2:03.812\\\">and</span> <span begin=\\\"2:03.812\\\" end=\\\"2:04.548\\\">I</span> <span begin=\\\"2:04.548\\\" end=\\\"2:04.812\\\">know</span> <span begin=\\\"2:04.812\\\" end=\\\"2:05.362\\\">I</span> <span begin=\\\"2:05.362\\\" end=\\\"2:05.659\\\">be</span><span begin=\\\"2:05.659\\\" end=\\\"2:06.951\\\">lieve</span></p></div><div begin=\\\"2:06.951\\\" end=\\\"2:22.358\\\" itunes:songPart=\\\"Chorus\\\"><p begin=\\\"2:06.951\\\" end=\\\"2:09.270\\\" itunes:key=\\\"L34\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:06.951\\\" end=\\\"2:07.392\\\">We're</span> <span begin=\\\"2:07.392\\\" end=\\\"2:08.024\\\">goin'</span> <span begin=\\\"2:08.024\\\" end=\\\"2:08.561\\\">up,</span> <span begin=\\\"2:08.561\\\" end=\\\"2:09.022\\\">up,</span> <span begin=\\\"2:09.022\\\" end=\\\"2:09.270\\\">up</span></p><p begin=\\\"2:09.270\\\" end=\\\"2:10.758\\\" itunes:key=\\\"L35\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:09.270\\\" end=\\\"2:09.558\\\">It's</span> <span begin=\\\"2:09.558\\\" end=\\\"2:10.017\\\">our</span> <span begin=\\\"2:10.017\\\" end=\\\"2:10.511\\\">mo</span><span begin=\\\"2:10.511\\\" end=\\\"2:10.758\\\">ment</span></p><p begin=\\\"2:10.900\\\" end=\\\"2:12.615\\\" itunes:key=\\\"L36\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:10.900\\\" end=\\\"2:11.131\\\">You</span> <span begin=\\\"2:11.131\\\" end=\\\"2:11.471\\\">know to</span><span begin=\\\"2:11.471\\\" end=\\\"2:11.782\\\">gether</span> <span begin=\\\"2:11.782\\\" end=\\\"2:11.960\\\">we're</span> <span begin=\\\"2:11.960\\\" end=\\\"2:12.615\\\">glowing</span></p><p begin=\\\"2:12.859\\\" end=\\\"2:14.506\\\" itunes:key=\\\"L37\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:12.859\\\" end=\\\"2:13.447\\\">Gonna be,</span> <span begin=\\\"2:13.447\\\" end=\\\"2:13.901\\\">gonna be</span> <span begin=\\\"2:13.901\\\" end=\\\"2:14.506\\\">golden</span></p><p begin=\\\"2:14.772\\\" end=\\\"2:17.108\\\" itunes:key=\\\"L38\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:14.772\\\" end=\\\"2:15.846\\\">Oh,</span> <span begin=\\\"2:15.846\\\" end=\\\"2:16.387\\\">up,</span> <span begin=\\\"2:16.387\\\" end=\\\"2:16.844\\\">up,</span> <span begin=\\\"2:16.844\\\" end=\\\"2:17.108\\\">up</span></p><p begin=\\\"2:17.108\\\" end=\\\"2:18.607\\\" itunes:key=\\\"L39\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:17.108\\\" end=\\\"2:17.349\\\">With</span> <span begin=\\\"2:17.349\\\" end=\\\"2:17.851\\\">our</span> <span begin=\\\"2:17.851\\\" end=\\\"2:18.284\\\">voi</span><span begin=\\\"2:18.284\\\" end=\\\"2:18.607\\\">ces</span></p><p begin=\\\"2:18.707\\\" end=\\\"2:20.380\\\" itunes:key=\\\"L40\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:18.707\\\" end=\\\"2:19.291\\\">영원히</span> <span begin=\\\"2:19.291\\\" end=\\\"2:19.561\\\">깨질</span> <span begin=\\\"2:19.561\\\" end=\\\"2:19.761\\\">수</span> <span begin=\\\"2:19.761\\\" end=\\\"2:20.092\\\">없</span><span begin=\\\"2:20.092\\\" end=\\\"2:20.380\\\">는</span></p><p begin=\\\"2:20.647\\\" end=\\\"2:22.358\\\" itunes:key=\\\"L41\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:20.647\\\" end=\\\"2:21.248\\\">Gonna be,</span> <span begin=\\\"2:21.248\\\" end=\\\"2:21.713\\\">gonna be</span> <span begin=\\\"2:21.713\\\" end=\\\"2:22.358\\\">golden</span></p></div><div begin=\\\"2:22.604\\\" end=\\\"2:38.157\\\" itunes:songPart=\\\"Chorus\\\"><p begin=\\\"2:22.604\\\" end=\\\"2:30.334\\\" itunes:key=\\\"L42\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:22.604\\\" end=\\\"2:23.609\\\">Oh,</span> <span begin=\\\"2:23.609\\\" end=\\\"2:24.139\\\">I'm</span> <span begin=\\\"2:24.139\\\" end=\\\"2:24.577\\\">done</span> <span begin=\\\"2:24.577\\\" end=\\\"2:25.115\\\">hi</span><span begin=\\\"2:25.115\\\" end=\\\"2:25.597\\\">ding,</span> <span begin=\\\"2:25.597\\\" end=\\\"2:26.091\\\">now</span> <span begin=\\\"2:26.091\\\" end=\\\"2:26.455\\\">I'm</span> <span begin=\\\"2:26.455\\\" end=\\\"2:27.527\\\">shining</span> <span begin=\\\"2:27.527\\\" end=\\\"2:27.993\\\">like</span> <span begin=\\\"2:27.993\\\" end=\\\"2:28.527\\\">I'm</span> <span begin=\\\"2:28.527\\\" end=\\\"2:28.977\\\">born</span> <span begin=\\\"2:28.977\\\" end=\\\"2:29.343\\\">to</span> <span begin=\\\"2:29.343\\\" end=\\\"2:30.334\\\">be</span></p><p begin=\\\"2:30.841\\\" end=\\\"2:38.157\\\" itunes:key=\\\"L43\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:30.841\\\" end=\\\"2:31.450\\\">Oh,</span> <span begin=\\\"2:31.450\\\" end=\\\"2:32.352\\\">our</span> <span begin=\\\"2:32.352\\\" end=\\\"2:32.938\\\">time,</span> <span begin=\\\"2:32.938\\\" end=\\\"2:33.348\\\">no</span> <span begin=\\\"2:33.348\\\" end=\\\"2:33.898\\\">fears,</span> <span begin=\\\"2:33.898\\\" end=\\\"2:34.381\\\">no</span> <span begin=\\\"2:34.381\\\" end=\\\"2:34.896\\\">lies,</span> <span begin=\\\"2:34.896\\\" end=\\\"2:35.379\\\">that's</span> <span begin=\\\"2:35.379\\\" end=\\\"2:35.830\\\">who</span> <span begin=\\\"2:35.830\\\" end=\\\"2:36.327\\\">we're</span> <span begin=\\\"2:36.327\\\" end=\\\"2:36.817\\\">born</span> <span begin=\\\"2:36.817\\\" end=\\\"2:37.145\\\">to</span> <span begin=\\\"2:37.145\\\" end=\\\"2:38.157\\\">be</span></p></div><div begin=\\\"2:38.222\\\" end=\\\"2:54.384\\\" itunes:songPart=\\\"Outro\\\"><p begin=\\\"2:38.222\\\" end=\\\"2:39.203\\\" itunes:key=\\\"L44\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:38.222\\\" end=\\\"2:38.633\\\">You</span> <span begin=\\\"2:38.633\\\" end=\\\"2:39.026\\\">know</span> <span begin=\\\"2:39.026\\\" end=\\\"2:39.203\\\">we're</span></p><p begin=\\\"2:39.203\\\" end=\\\"2:40.949\\\" itunes:key=\\\"L45\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:39.203\\\" end=\\\"2:39.784\\\">Gonna be,</span> <span begin=\\\"2:39.784\\\" end=\\\"2:40.241\\\">gonna be</span> <span begin=\\\"2:40.241\\\" end=\\\"2:40.949\\\">golden</span></p><p begin=\\\"2:40.949\\\" end=\\\"2:42.375\\\" itunes:key=\\\"L46\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:40.949\\\" end=\\\"2:41.235\\\">We're</span> <span begin=\\\"2:41.235\\\" end=\\\"2:41.717\\\">gonna be,</span> <span begin=\\\"2:41.717\\\" end=\\\"2:42.070\\\">gonna</span> <span begin=\\\"2:42.070\\\" end=\\\"2:42.375\\\">be</span></p><p begin=\\\"2:43.076\\\" end=\\\"2:44.860\\\" itunes:key=\\\"L47\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:43.076\\\" end=\\\"2:43.679\\\">Born to be,</span> <span begin=\\\"2:43.679\\\" end=\\\"2:44.147\\\">born to be</span> <span begin=\\\"2:44.147\\\" end=\\\"2:44.860\\\">glowin'</span></p><p begin=\\\"2:44.860\\\" end=\\\"2:46.201\\\" itunes:key=\\\"L48\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:44.860\\\" end=\\\"2:45.160\\\">밝</span><span begin=\\\"2:45.160\\\" end=\\\"2:45.787\\\">게 빛나는</span> <span begin=\\\"2:45.787\\\" end=\\\"2:46.201\\\">우리</span></p><p begin=\\\"2:46.329\\\" end=\\\"2:54.384\\\" itunes:key=\\\"L49\\\" ttm:agent=\\\"v1\\\"><span begin=\\\"2:46.329\\\" end=\\\"2:46.535\\\">You</span> <span begin=\\\"2:46.535\\\" end=\\\"2:46.861\\\">know</span> <span begin=\\\"2:46.861\\\" end=\\\"2:47.077\\\">that</span> <span begin=\\\"2:47.077\\\" end=\\\"2:47.577\\\">it's</span> <span begin=\\\"2:47.577\\\" end=\\\"2:48.011\\\">our</span> <span begin=\\\"2:48.011\\\" end=\\\"2:48.538\\\">time,</span> <span begin=\\\"2:48.538\\\" end=\\\"2:48.951\\\">no</span> <span begin=\\\"2:48.951\\\" end=\\\"2:49.516\\\">fears,</span> <span begin=\\\"2:49.516\\\" end=\\\"2:49.989\\\">no</span> <span begin=\\\"2:49.989\\\" end=\\\"2:50.481\\\">lies,</span> <span begin=\\\"2:50.481\\\" end=\\\"2:50.973\\\">that's</span> <span begin=\\\"2:50.973\\\" end=\\\"2:51.421\\\">who</span> <span begin=\\\"2:51.421\\\" end=\\\"2:51.944\\\">we're</span> <span begin=\\\"2:51.944\\\" end=\\\"2:52.421\\\">born</span> <span begin=\\\"2:52.421\\\" end=\\\"2:52.755\\\">to</span> <span begin=\\\"2:52.755\\\" end=\\\"2:54.384\\\">be</span></p></div></body></tt>"
-//}
+import android.content.ContentResolver
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.util.Log
+
+private const val TAG = "ASProviderTest"
+
+/**
+ * 原实现问题：
+ * ```
+ * fun testContentResolver(context: Context) {
+ *     val uri = Uri.parse("content://com.rosan.installer.x.revived.fileprovider/...")
+ *     resolver.query(uri, null, null, null, null)
+ * }
+ * ```
+ *
+ * 问题 1：URI 路径 "..." 无效；
+ * 问题 2：FileProvider 默认 android:exported="false"，
+ *         直接用 contentResolver.query() 访问未授权 URI 会被系统拒绝。
+ *
+ * 触发日志：
+ *   Permission Denial: opening provider androidx.core.content.FileProvider
+ *   from ProcessRecord{...com.rosan.installer.x.revived/u0a526} (pid=11994, uid=10526)
+ *   that is not exported from UID 10202
+ *
+ * 含义：uid=10526 的 Rosan Installer 尝试打开 uid=10202 应用的 FileProvider，
+ *       但该 provider 未导出且没有收到 FLAG_GRANT_READ_URI_PERMISSION 临时授权，
+ *       系统在 ActivityManagerService 侧直接拒绝。
+ *
+ * 正确访问 FileProvider 的前提（三选一）：
+ *   1) 通过 Intent 收到带 FLAG_GRANT_READ_URI_PERMISSION / FLAG_GRANT_WRITE_URI_PERMISSION 的 content:// URI；
+ *   2) 持有方调用 grantUriPermission() 显式授权给你的包名；
+ *   3) 与持有方同 UID 或同签名。
+ */
+
+/** 兼容旧签名：没有授权来源时，安全检查并给出明确提示，而不是直接抛异常。 */
+fun testContentResolver(context: Context) {
+    testContentResolver(context, null)
+}
+
+/**
+ * 推荐：从带授权的 Intent 中取出 content:// URI 再访问。
+ * 这是第三方应用访问 FileProvider 的标准姿势。
+ */
+fun testContentResolver(context: Context, intent: Intent?) {
+    // 1. 尝试从 Intent 获取持有方已授权的 URI
+    val uri = intent?.data
+    if (uri == null) {
+        Log.w(TAG, "未提供 content:// URI（Intent.data 为空）")
+        return
+    }
+    if (uri.scheme != ContentResolver.SCHEME_CONTENT) {
+        Log.w(TAG, "不是 content:// URI: $uri")
+        return
+    }
+
+    // 2. 检查 Intent 是否携带了系统授予的临时权限
+    val readGranted = intent.flags and Intent.FLAG_GRANT_READ_URI_PERMISSION != 0
+    if (!readGranted) {
+        Log.w(TAG, "Intent 未携带 FLAG_GRANT_READ_URI_PERMISSION，访问会被 Permission Denial 拒绝")
+        return
+    }
+    Log.i(TAG, "已获得临时读取授权: $uri")
+
+    // 3. 执行实际查询
+    queryUri(context, uri)
+}
+
+/** 另一种标准姿势：访问前先检查当前包是否对该 URI 持有授权。 */
+fun testContentResolverWithPermissionCheck(context: Context, uri: Uri, targetPackage: String) {
+    val pm = context.packageManager
+    val selfUid = context.applicationInfo.uid
+    val targetUid = try {
+        pm.getApplicationInfo(targetPackage, 0).uid
+    } catch (e: PackageManager.NameNotFoundException) {
+        Log.e(TAG, "目标包不存在: $targetPackage")
+        return
+    }
+
+    // 同 UID 可以直接访问
+    if (selfUid == targetUid) {
+        Log.i(TAG, "与目标包同 UID，可直接访问")
+        queryUri(context, uri)
+        return
+    }
+
+    // 检查是否已持有该 URI 的读取授权（可能来自之前的 Intent 或持久化授权）
+    val mode = context.checkUriPermission(uri, 0, 0, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    if (mode == PackageManager.PERMISSION_GRANTED) {
+        Log.i(TAG, "已持有该 URI 的读取授权")
+        queryUri(context, uri)
+    } else {
+        Log.w(TAG, "未持有读取授权 → 系统会抛出 Permission Denial")
+    }
+}
+
+private fun queryUri(context: Context, uri: Uri) {
+    val resolver: ContentResolver = context.contentResolver
+    try {
+        val cursor = resolver.query(uri, null, null, null, null)
+        cursor?.use {
+            while (it.moveToNext()) {
+                Log.i(TAG, "查询到 ${it.columnCount} 列")
+            }
+        } ?: Log.w(TAG, "query 返回 null")
+    } catch (e: SecurityException) {
+        // 这里就是日志中的 Permission Denial
+        Log.e(TAG, "SecurityException (Permission Denial): ${e.message}")
+    } catch (e: Exception) {
+        Log.e(TAG, "查询异常: $e")
+    }
+}

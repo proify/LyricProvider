@@ -35,12 +35,26 @@ object AppleSongParser {
         // translation = get(o, "getTranslation") as? String
         // translationLanguages = StringVectorParser.parserStringVectorNative(get(o, "getTranslationLanguages"))
 
-        adamId?.let {
-            MediaMetadataCache.getMetadataById(it)
-                ?.let { metadata ->
-                    name = metadata.title
-                    artist = metadata.artist
-                }
+        // ★ 歌名/歌手优先级：
+        // 1) 直接从原生 Song 对象获取（getTitle/getName/getArtist 等，最可靠、与 MediaSession 无关）
+        // 2) 从 MediaMetadataCache 通过 adamId 查（兼容 adamId 与 mediaId 不一致）
+        name = callMethod(songNative, "getTitle")?.toString()
+            ?: callMethod(songNative, "getName")?.toString()
+            ?: callMethod(songNative, "getTitleText")?.toString()
+        artist = callMethod(songNative, "getArtist")?.toString()
+            ?: callMethod(songNative, "getArtistName")?.toString()
+
+        if (name == null || artist == null) {
+            adamId?.let {
+                // 优先用 adamId 直接查 MediaMetadata；
+                // 若查不到（adamId 与 mediaId 不一致），
+                // 则尝试通过 adamId 反查 mediaId 对应的 Metadata。
+                MediaMetadataCache.getMetadataByIdOrAdamId(it)
+                    ?.let { metadata ->
+                        name = name ?: metadata.title
+                        artist = artist ?: metadata.artist
+                    }
+            }
         }
     }
 }
