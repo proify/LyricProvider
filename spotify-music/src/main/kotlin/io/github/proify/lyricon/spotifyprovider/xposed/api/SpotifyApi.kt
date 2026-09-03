@@ -27,7 +27,10 @@ object SpotifyApi {
 
     private const val BASE_URL = "https://guc3-spclient.spotify.com/color-lyrics/v2/track/"
 
-    val headers = mutableMapOf<String, String>()
+    /** 请求头锁：捕获 Hook 与网络线程可能并发读写 */
+    private val headersLock = Any()
+
+    private val headers = mutableMapOf<String, String>()
 
     val jsonParser = Json {
         ignoreUnknownKeys = true
@@ -55,6 +58,27 @@ object SpotifyApi {
     fun fetchRawLyric(id: String): ByteArray = performNetworkRequest(id)
 
     /**
+     * 记录一条从宿主请求中捕获的请求头（线程安全）。
+     *
+     * @return true 表示值有更新
+     */
+    fun recordHeader(key: String, value: String): Boolean = synchronized(headersLock) {
+        if (headers[key] == value) {
+            false
+        } else {
+            headers[key] = value
+            true
+        }
+    }
+
+    /**
+     * 返回已捕获请求头的快照（线程安全）。
+     */
+    fun snapshotHeaders(): Map<String, String> = synchronized(headersLock) {
+        headers.toMap()
+    }
+
+    /**
      * 执行实际的网络请求逻辑
      */
     @Throws(Exception::class)
@@ -70,8 +94,8 @@ object SpotifyApi {
             .addHeader("content-type", "application/protobuf")
             .addHeader("app-platform", "Android")
 
-        // 注入外部配置的 Header
-        headers.forEach { (key, value) ->
+        // 注入外部配置的 Header（快照拷贝，避免并发修改异常）
+        snapshotHeaders().forEach { (key, value) ->
             requestBuilder.addHeader(key, value)
         }
 
